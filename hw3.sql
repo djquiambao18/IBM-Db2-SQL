@@ -29,21 +29,36 @@ Grade:		char(1)		e.g. (must be either A, B, C, D, F, I, or W); nullable
 - It is possible for a student to repeat a class.  In this case, they just need at least 1 passing grade in the list.
 */
 
--- Disallow insertion of duplicate student_id in the Student table and duplicate class_id in the Class table (DDL Statement)
-CREATE TABLE HW3.STUDENT (
-        STUDENT_ID char (6) NOT NULL,
-        FIRST varchar (15) NOT NULL,
-        LAST varchar (15) NOT NULL,
-        gender char (1)
-) ADD CONSTRAINT 
+-- disallow insertion of duplicate student_id in the Student table and duplicate class_id in the Class table (DDL Statement)
+connect to cs157a^
+CREATE TABLE hw3.student (
+        student_id char (6) NOT NULL,
+        first varchar (15) NOT NULL,
+        last varchar (15) NOT NULL,
+        gender char (1),
+        CHECK(gender in ('M', 'F', 'O'))
+        PRIMARY KEY(student_id)
+)^
 
-ALTER TABLE HW3.STUDENT
-ADD CONSTRAINT HW3_STUDENT_PK PRIMARY KEY (Student_Id);
+CREATE TABLE hw3.class (
+    class_id char (6) NOT NULL,
+    name varchar (20) NOT NULL,
+    desc varchar (20) NOT NULL 
+    PRIMARY KEY(class_id)
+ )^
 
-ALTER TABLE HW3.CLASS
-ADD CONSTRAINT HW3_CLASS_PK PRIMARY KEY (Class_Id);
 
 -- If a class is drop from the class table, cascade the delete to the child rows that are dependent on it.  (DDL statement)
+CREATE TABLE hw3.class_prereq (
+    class_id char (6) NOT NULL,
+    prereq_id char (6) NOT NULL,
+    req_grade char (1) NOT NULL,
+    CHECK(req_grade in ('A', 'B', 'C', 'D', 'F', 'I', 'W')),
+    FOREIGN KEY(class_id) REFERENCES hw3.class(class_id) ON DELETE CASCADE,
+    FOREIGN KEY(prereq_id) REFERENCES hw3.class(class_id) ON DELETE CASCADE,
+    PRIMARY KEY(class_id, prereq_id)
+)^
+
 ALTER TABLE HW3.CLASS
 ADD CONSTRAINT HW3_CLASS_FK FOREIGN KEY (Class_Id) REFERENCES HW3.CLASS(Class_Id) ON DELETE CASCADE;
 
