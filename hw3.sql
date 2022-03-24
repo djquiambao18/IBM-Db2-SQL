@@ -56,39 +56,66 @@ CREATE TABLE hw3.class_prereq (
     CHECK(req_grade in ('A', 'B', 'C', 'D', 'F', 'I', 'W')),
     FOREIGN KEY(class_id) REFERENCES hw3.class(class_id) ON DELETE CASCADE,
     FOREIGN KEY(prereq_id) REFERENCES hw3.class(class_id) ON DELETE CASCADE,
+    CHECK(prereq_id <> class_id)
     PRIMARY KEY(class_id, prereq_id)
 )^
 
-ALTER TABLE HW3.CLASS
-ADD CONSTRAINT HW3_CLASS_FK FOREIGN KEY (Class_Id) REFERENCES HW3.CLASS(Class_Id) ON DELETE CASCADE;
 
 -- Disallow insertion of invalid student id or class id in the Schedule table. (DDL statement)
-ALTER TABLE HW3.SCHEDULE
-ADD CONSTRAINT HW3_SCHEDULE_FK_STUDENT FOREIGN KEY (Student_Id) REFERENCES HW3.STUDENT(Student_Id) ON DELETE CASCADE;
+CREATE TABLE hw3.schedule (
+    student_id char (6) NOT NULL,
+    class_id char (6) NOT NULL,
+    semester int NOT NULL,
+    year int NOT NULL,
+    grade char (1),
+    CHECK(semester in (1, 2, 3)),
+    CHECK(year in (1950, 1951, …, 2022)),
+    CHECK(grade in ('A', 'B', 'C', 'D', 'F', 'I', 'W')),
+    FOREIGN KEY(student_id) REFERENCES hw3.student(student_id) ON DELETE CASCADE,
+    FOREIGN KEY(class_id) REFERENCES hw3.class(class_id) ON DELETE CASCADE,
+    PRIMARY KEY(student_id, class_id)
+)^
+
 
 -- Disallow students to take a class without completing their pre-requisite(s) (Must use a trigger). The trigger must return an error message “Missing Pre-req” when trying to insert a class without its proper pre-req.
 CREATE TRIGGER hw3.classcheck
-BEFORE INSERT ON HW3.SCHEDULE
-FOR EACH ROW
-BEGIN
-    SELECT
-        COUNT(*)
-    FROM
-        HW3.CLASS_PREREQ
-    WHERE
-        HW3.CLASS_PREREQ.Class_Id = NEW.Class_Id
-        AND HW3.CLASS_PREREQ.Prereq_Id NOT IN (
-            SELECT
-                HW3.SCHEDULE.Class_Id
-            FROM
-                HW3.SCHEDULE
-            WHERE
-                HW3.SCHEDULE.Student_Id = NEW.Student_Id
-                AND HW3.SCHEDULE.Grade = 'A'
-        );
-    IF (COUNT(*) > 0) THEN
-        RAISE_APPLICATION_ERROR(-20001, 'Missing Pre-req');
-    END IF;
-END;
+NO CASCADE BEFORE INSERT ON hw3.schedule
+REFERENCING NEW as newrow
+FOR EACH ROW MODE DB2SQL
+BEGIN ATOMIC
+    DECLARE class_id_check char(6);
+    DECLARE prereq_id_check char(6);
+    DECLARE req_grade_check char(1);
+    DECLARE grade_check char(1);
+    DECLARE grade_check_result int;
+    SELECT req_grade 
+    -- IF EXISTS (SELECT * FROM hw3.class_prereq WHERE class_id = newrow.class_id AND NOT EXISTS (SELECT * FROM hw3.schedule WHERE student_id = newrow.student_id AND grade < )) THEN
+    --     RAISE_APPLICATION_ERROR(-20001, 'Missing Pre-req');
+    -- END IF;
+END^
+
+-- CREATE TRIGGER hw3.classcheck
+-- BEFORE INSERT ON HW3.SCHEDULE
+-- FOR EACH ROW
+-- BEGIN
+--     SELECT
+--         COUNT(*)
+--     FROM
+--         HW3.CLASS_PREREQ
+--     WHERE
+--         HW3.CLASS_PREREQ.Class_Id = NEW.Class_Id
+--         AND HW3.CLASS_PREREQ.Prereq_Id NOT IN (
+--             SELECT
+--                 HW3.SCHEDULE.Class_Id
+--             FROM
+--                 HW3.SCHEDULE
+--             WHERE
+--                 HW3.SCHEDULE.Student_Id = NEW.Student_Id
+--                 AND HW3.SCHEDULE.Grade = 'A'
+--         );
+--     IF (COUNT(*) > 0) THEN
+--         RAISE_APPLICATION_ERROR(-20001, 'Missing Pre-req');
+--     END IF;
+-- END;
 
 
