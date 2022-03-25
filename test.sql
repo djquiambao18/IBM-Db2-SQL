@@ -10,7 +10,7 @@ INSERT INTO hw3.student VALUES
        ('900000','John','Doe','M'),
        ('900001','Jane','Doe','F'),
        ('900002','James','Bond','M'),
-       ('900003','Chris','Newman','U'),
+       ('900003','Chris','Newman','O'),
        ('900004','Ken','Tsang','M');
 
 --Inserting data into the class table
@@ -52,7 +52,7 @@ INSERT INTO hw3.class_prereq VALUES
 --Test #1 (HW3.STUDENT)
 INSERT INTO hw3.student VALUES ('000001','Test','Student 1','M');
 INSERT INTO hw3.student VALUES ('000002','Test','Student 2','F');
-INSERT INTO hw3.student VALUES ('000003','Test','Student 3','U');
+INSERT INTO hw3.student VALUES ('000003','Test','Student 3','O');
 -- error tests
 INSERT INTO hw3.student VALUES ('000001','Duplicate','ID test','F');
 INSERT INTO hw3.student VALUES (NULL, 'Test','Student 2','M');
