@@ -1,3 +1,4 @@
+connect to cs157a^
 drop TRIGGER hw3.classcheck^
 drop table hw3.schedule^
 drop table hw3.class_prereq^
