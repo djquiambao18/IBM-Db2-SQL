@@ -69,22 +69,33 @@ CREATE TABLE hw3.schedule (
 
 CREATE TRIGGER hw3.classcheck
 NO CASCADE BEFORE INSERT ON HW3.SCHEDULE
-FOR EACH ROW
-BEGIN
-    SELECT COUNT(*) FROM (hw3.class_prereq
-    WHERE hw3.class_prereq.class_id = NEW.class_id
-        AND hw3.class_prereq.prereq_id NOT IN (
-            SELECT
-                hw3.schedule.class_id
-            FROM
-                hw3.schedule
-            WHERE
-                HW3.SCHEDULE.Student_Id = NEW.Student_Id
-                AND (hw3.schedule.grade <= hw3.class_prereq.req_grade)
-        );
-    IF (COUNT(*) > 0) THEN
+REFERENCING NEW AS newrow
+FOR EACH ROW MODE DB2SQL
+-- WHEN ( (SELECT COUNT(*) FROM hw3.class_prereq WHERE class_id = newrow.class_id) > 0 AND prereq_id NOT IN (
+--     SELECT class_id FROM hw3.schedule WHERE student_id = newrow.student_id AND grade <= (SELECT req_grade FROM hw3.class_prereq WHERE class_id = newrow.class_id))
+--     ) )
+BEGIN ATOMIC
+    IF ( (SELECT COUNT(*) FROM hw3.class_prereq WHERE hw3.class_prereq.class_id = newrow.class_id) > 0 AND (
+        SELECT class_id FROM hw3.schedule WHERE student_id = newrow.student_id AND grade <= (SELECT req_grade FROM hw3.class_prereq WHERE class_id = newrow.class_id) > 0)
+        )
+    THEN
         SIGNAL SQLSTATE '88888' ( 'Missing Pre-req' );
     END IF;
+    -- (SELECT COUNT(*) FROM hw3.class_prereq
+    -- WHERE hw3.class_prereq.class_id = newrow.class_id
+    --     AND prereq_id NOT IN (
+    --         SELECT
+    --             class_id
+    --         FROM
+    --             hw3.schedule
+    --         WHERE
+    --             student_id = newrow.student_id
+    --             AND hw3.schedule.grade <= hw3.class_prereq.req_grade
+    --     );
+    -- );
+    -- IF (COUNT(*) > 0) THEN
+    --     SIGNAL SQLSTATE '88888' ( 'Missing Pre-req' );
+    -- END IF;
 END^
 
 
