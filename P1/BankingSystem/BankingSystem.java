@@ -2,6 +2,7 @@ import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLDataException;
 import java.sql.Statement;
 import java.util.Properties;
 
@@ -64,8 +65,53 @@ public class BankingSystem {
 	public static void newCustomer(String name, String gender, String age, String pin) 
 	{
 		System.out.println(":: CREATE NEW CUSTOMER - RUNNING");
-				/* insert your code here */
-		System.out.println(":: CREATE NEW CUSTOMER - SUCCESS");
+		// Useful scoped vars:
+		int n_age = 0, n_pin = 0;
+		char ch_gender = 0;
+
+		// Input Validation
+		try{
+			if(gender.length() == 1 && !age.isEmpty() && !pin.isEmpty())
+			name = name.trim(); // clean out both ends of string of whitespaces
+			n_age = Integer.parseInt(age); // check if age is an integer
+			n_pin = Integer.parseInt(pin); // check if pin is an integer
+			ch_gender = gender.charAt(0);
+		}
+		catch(Exception e){
+			System.out.println(":: CREATE NEW CUSTOMER - FAILED");
+			System.out.println("Invalid input");
+			e.printStackTrace();
+			return;
+		}
+		if(!name.isEmpty() && name.matches("[a-zA-Z\s]+") && n_age > 0 && n_age < 150) // check if name is alphabetic and age is between 0 and 120
+		{
+			try {
+				Class.forName(driver);
+				con = DriverManager.getConnection(url, username, password);
+				stmt = con.createStatement();
+				String query = "INSERT INTO customer (name, gender, age, pin) VALUES (" 
+								+ name + ", " + ch_gender + ", " + n_age + ", " + n_pin + ");";
+				rs = stmt.executeQuery(query);
+				String rs_name = rs.getString(1);
+				String rs_gender = rs.getString(2);
+				String rs_age = rs.getString(3);
+				String rs_pin = rs.getString(4);
+				System.out.println(":: CREATE NEW CUSTOMER - SUCCESS");
+				rs.close();
+				stmt.close();
+				con.close();
+			} catch(SQLDataException e){
+				System.out.println(":: CREATE NEW CUSTOMER - FAILED");
+				e.printStackTrace();
+			}
+			catch (Exception e) {
+				System.out.println(":: CREATE NEW CUSTOMER - FAILED");
+				e.printStackTrace();
+			}
+			}
+			
+		}
+		
 	}
 
 	/**
