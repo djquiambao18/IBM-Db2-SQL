@@ -108,10 +108,9 @@ public class BankingSystem {
 				System.out.println(":: CREATE NEW CUSTOMER - FAILED");
 				e.printStackTrace();
 			}
-			}
-			
 		}
 		
+			
 	}
 
 	/**
