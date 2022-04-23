@@ -1,0 +1,60 @@
+This is your JDBC assignment.  Make sure you can successfully compile & run the sample.java steps before going any further.
+
+p1.docx  Download p1.docx 
+
+sample.java  Download sample.java 
+
+sample.properties  Download sample.properties 
+
+db2jcc4.jar Download db2jcc4.jar
+
+Sample README.txt  Download Sample README.txt 
+
+Follow the instruction in Sample README.txt file.  If all steps are successful, you should have the SELECT results from the sample.java program to display part of the employee table.  This will test your setup and communication between your OS and docker.
+
+1. Download all these file (along with the new driver file above db2jcc4.jar into a single directory).
+
+2. Compile all the *.java files  (e.g. javac *.java)
+
+3. Copy p1_create.sql to your container directory ( e.g. docker cp ./p1_create.sql 92a7b62a44b1:./database/config/db2inst1/. )
+
+4. Execute p1_create.sql inside the Db2 container (e.g. db2 -tvf p1_create.sql )
+
+5. Execute the test framework by java -cp ":./db2jcc4.jar" ProgramLauncher ./db.properties >test1.out
+
+This db.properties file contain the usual 4 lines + a set of test data for  9 methods defined in BankingSystem.java:
+
+
+public static void newCustomer(String name, String gender, String age, String pin) 
+
+public static void openAccount(String id, String type, String amount) 
+
+public static void closeAccount(String accNum) 
+
+public static void deposit(String accNum, String amount) 
+
+public static void withdraw(String accNum, String amount) 
+
+public static void transfer(String srcAccNum, String destAccNum, String amount) 
+
+public static void accountSummary(String cusID) 
+
+public static void reportA() 
+
+public static void reportB(String min, String max)
+
+The only method that is not there is the login method which you will define only if you have an UI.  After you execute the command above.  test1.out contains the output of the run.  It should match the test_empty.out above.  Once you implemented the 9 methods, your output should looks like test_full.out. 
+
+6.  The command line UI is REQUIRED as part of the original submission.  If you want extra credit, you can ADD an optional GUI (in additional to the command line UI) and it will count as extra credit (+20 points - however extra credit will not be counted if submitted past the "due date").  Command line main class should be p1.java.  If you plan to submit the UI for extra credit, make sure you have Clear instructions in your readme file so the TA can follow. 
+
+7.  One important note - you cannot use/call any of the stored procedures from P1.  That means all the logic will be Java/JDBC code inside each method.
+
+8.  Without extra credit, you need to submit BankingSystem.java, p1.java,  and a readme file.  If you have other files, make sure you submit and describe them in your readme file.
+
+9. Grading will be based on the 9 methods inside the BankingSystem.java  (login will only be use by the UI).  The batch testing will use mainly "good" data with a few error testcases.  However when you submit an UI, there will be lots more error testing (e.g. input validation, ... etc)
+
+ 
+
+TIPS:  You should always run p1_create.sql each time before you run the Java program, otherwise your output may not sync up correctly due to the auto-generated IDs.
+
+Note:   Even though I came up with the idea of this batch testing framework.  You are welcome to use it in future classes.  This tool is a good way to test each individual Java class method without have a front-end or any user interface.

@@ -97,21 +97,36 @@ public class BankingSystem {
 			e.printStackTrace();
 			return;
 		}
-		if(!name.isEmpty() && name.matches("[a-zA-Z\s]+") && n_age >= 0 && n_pin >= 0 && (ch_gender == 'M' || ch_gender == 'F')) // check if name is alphabetic and age is between 0 and 120
+		if(!name.isEmpty() && name.matches("[a-zA-Z ]+") && n_age >= 0 && n_pin >= 0 && (ch_gender == 'M' || ch_gender == 'F')) // check if name is alphabetic and age is between 0 and 120
 		{
 			if(name.length() <= 15){
 				try {
 					Class.forName(driver);
 					con = DriverManager.getConnection(url, username, password);
-					stmt = con.createStatement();
-					String query = "INSERT INTO p1.customer (name, gender, age, pin) VALUES ('" 
+					String query = "INSERT INTO P1.CUSTOMER (name, gender, age, pin) VALUES ('"
 									+ name + "', '" + ch_gender + "', " + n_age + ", " + n_pin + ");";
+					stmt = con.createStatement();
+					stmt.executeUpdate(query);
+					rs = stmt.getResultSet();
+					if(rs != null){
+						System.out.println(rs.getInt(1));
+						rs.close();
+					}
+					stmt.close();
+					query = "SELECT ID FROM P1.CUSTOMER";
+					stmt = con.createStatement();
 					rs = stmt.executeQuery(query);
 					
-					int rs_id = rs.getInt("ID");
+					if(rs != null){
+						while(rs.next())
+							System.out.println(rs.getInt(1));
+					}
+					con.close();
+					
+					// System.out.println(rs.getInt(1));
+					
 					
 					System.out.println(":: CREATE NEW CUSTOMER - SUCCESS");
-					System.out.println(rs_id);
 					
 				} catch(SQLException e){
 					System.out.print("SQLException");
@@ -121,18 +136,6 @@ public class BankingSystem {
 				} catch(Exception e) {
 					System.out.println(":: CREATE NEW CUSTOMER - FAILED");
 					e.printStackTrace();
-				}
-				finally{
-					try{
-						rs.close();
-						stmt.close();
-						con.close();
-					} catch(SQLException e){
-						System.out.println("Error closing connection");
-						e.printStackTrace();
-						return;
-					}
-					
 				}
 			}
 			else{
@@ -149,7 +152,7 @@ public class BankingSystem {
 			else if(name.isEmpty()){
 				System.out.println("Name cannot be empty!");
 			}
-			else if(!name.matches("[a-zA-Z\s]+")){
+			else if(!name.matches("[a-zA-Z ]+")){
 				System.out.println("Name is not a valid name (not recognized as a character in the A-Z range)");
 			}
 			else if(n_age < 0){
@@ -201,10 +204,22 @@ public class BankingSystem {
 						stmt = con.createStatement();
 						String query = "INSERT INTO p1.account (id, type, balance, status) VALUES (" 
 										+ n_id + ", '" + ch_type + "', " + n_amount + ", 'A');"; //A for active, I for Inactive
-						rs = stmt.executeQuery(query);
-						int rs_number = rs.getInt("number");
-						System.out.println(rs_number);
+						if(stmt.execute(query)){
+							rs = stmt.getResultSet();
+							int rs_number = rs.getInt(1);
+							System.out.println(rs_number);
+							rs.close();
+						}
+						
+						
+						
 						System.out.println(":: OPEN ACCOUNT - SUCCESS");
+						
+						stmt.close();
+						con.close();
+						
+						return;
+						
 					}
 
 				} catch(SQLException e){
@@ -218,18 +233,6 @@ public class BankingSystem {
 					System.out.println(":: OPEN ACCOUNT - FAILED");
 					e.printStackTrace();
 					return;
-				}
-				finally{
-					try{
-						rs.close();
-						stmt.close();
-						con.close();
-					}
-					catch (SQLException e){
-						System.out.println("Error closing connection");
-						e.printStackTrace();
-						return;
-					}
 				}
 		
 	}
@@ -269,7 +272,11 @@ public class BankingSystem {
 					stmt = con.createStatement();
 					// Set Status to I for account number and set amount to 0
 					String query = "UPDATE p1.account SET status = 'I', balance = 0 WHERE number = " + n_accNum + ";";
-					rs = stmt.executeQuery(query);
+					stmt.execute(query);
+					rs = stmt.getResultSet();
+					rs.close();
+					stmt.close();
+					con.close();
 					System.out.println(":: CLOSE ACCOUNT - SUCCESS");
 				} catch(SQLException e){
 					System.out.print("SQLException");
@@ -279,18 +286,6 @@ public class BankingSystem {
 				} catch(Exception e) {
 					System.out.println(":: CLOSE ACCOUNT - FAILED");
 					e.printStackTrace();
-				}
-				finally{
-					try{
-						rs.close();
-						stmt.close();
-						con.close();
-					}
-					catch (SQLException e){
-						System.out.println("Error closing connection");
-						e.printStackTrace();
-						return;
-					}
 				}
 	}
 
@@ -331,7 +326,11 @@ public class BankingSystem {
 					stmt = con.createStatement();
 					// Set balance to balance + amount
 					String query = "UPDATE p1.account SET balance = balance + " + n_amount + " WHERE number = " + n_accNum + ";";
-					rs = stmt.executeQuery(query);
+					stmt.execute(query);
+					rs = stmt.getResultSet();
+					rs.close();
+					stmt.close();
+					con.close();
 					System.out.println(":: DEPOSIT - SUCCESS");
 				} catch(SQLException e){
 					System.out.print("SQLException");
@@ -345,18 +344,7 @@ public class BankingSystem {
 					System.out.println(":: DEPOSIT - FAILED");
 					return;
 				}
-				finally{
-					try{
-						rs.close();
-						stmt.close();
-						con.close();
-					}
-					catch (SQLException e){
-						System.out.println("Error closing connection");
-						e.printStackTrace();
-						return;
-					}
-				}
+				
 	}
 
 	/**
@@ -396,7 +384,11 @@ public class BankingSystem {
 					stmt = con.createStatement();
 					// Set balance to balance - amount
 					String query = "UPDATE p1.account SET balance = balance - " + n_amount + " WHERE number = " + n_accNum + ";";
-					rs = stmt.executeQuery(query);
+					stmt.execute(query);
+					rs = stmt.getResultSet();
+					rs.close();
+					stmt.close();
+					con.close();
 					System.out.println(":: WITHDRAW - SUCCESS");
 				} catch(SQLException e){
 					System.out.print("SQLException");
@@ -409,18 +401,7 @@ public class BankingSystem {
 					System.out.println(":: WITHDRAW - FAILED");
 					return;
 				}
-				finally{
-					try{
-						rs.close();
-						stmt.close();
-						con.close();
-					}
-					catch (SQLException e){
-						System.out.println("Error closing connection");
-						e.printStackTrace();
-						return;
-					}
-				}
+			
 	}
 
 	/**
@@ -463,10 +444,15 @@ public class BankingSystem {
 					stmt = con.createStatement();
 					// Set balance to balance - amount
 					String query = "UPDATE p1.account SET balance = balance - " + n_amount + " WHERE number = " + n_srcAccNum + ";";
-					rs = stmt.executeQuery(query);
+					stmt.execute(query);
+					rs = stmt.getResultSet();
 					// Set balance to balance + amount
 					query = "UPDATE p1.account SET balance = balance + " + n_amount + " WHERE number = " + n_destAccNum + ";";
-					rs = stmt.executeQuery(query);
+					stmt.execute(query);
+					rs = stmt.getResultSet();
+					rs.close();
+					stmt.close();
+					con.close();
 				System.out.println(":: TRANSFER - SUCCESS");
 				} catch(SQLException e){
 					System.out.print("SQLException");
@@ -478,18 +464,6 @@ public class BankingSystem {
 					cnfe.printStackTrace();
 					System.out.println(":: TRANSFER - FAILED");
 					return;
-				}
-				finally{
-					try{
-						rs.close();
-						stmt.close();
-						con.close();
-					}
-					catch (SQLException e){
-						System.out.println("Error closing connection");
-						e.printStackTrace();
-						return;
-					}
 				}
 	}
 
@@ -527,7 +501,8 @@ public class BankingSystem {
 				con = DriverManager.getConnection(url, username, password);
 				stmt = con.createStatement();
 				String query = "SELECT number, balance FROM p1.account WHERE customer_id = " + n_cusID + ";";
-				rs = stmt.executeQuery(query);
+				stmt.execute(query);
+				rs = stmt.getResultSet();
 				int totalBalance = 0;
 				System.out.println("Account Number\tBalance");
 				while(rs.next())
@@ -535,6 +510,9 @@ public class BankingSystem {
 					System.out.println(rs.getInt(1) + "\t\t" + rs.getInt(2));
 					totalBalance += rs.getInt(2);
 				}
+				rs.close();
+				stmt.close();
+				con.close();
 				System.out.println("Total Balance\t" + totalBalance);
 				System.out.println(":: ACCOUNT SUMMARY - SUCCESS");
 			} catch(SQLException e){
@@ -547,18 +525,6 @@ public class BankingSystem {
 				cnfe.printStackTrace();
 				System.out.println(":: ACCOUNT SUMMARY - FAILED");
 				return;
-			}
-			finally{
-				try{
-					rs.close();
-					stmt.close();
-					con.close();
-				}
-				catch (SQLException e){
-					System.out.println("Error closing connection");
-					e.printStackTrace();
-					return;
-				}
 			}
 	}
 
@@ -574,11 +540,15 @@ public class BankingSystem {
 			con = DriverManager.getConnection(url, username, password);
 			stmt = con.createStatement();
 			String query = "SELECT C.id, C.name, C.age, C.gender, SUM(A.balance) AS total FROM CUSTOMER C LEFT JOIN ACCOUNT A ON C.id=A.id ORDER BY total DESC";
-			rs = stmt.executeQuery(query);
+			stmt.execute(query);
+			rs = stmt.getResultSet();
 			System.out.println("ID" + "\t" + "Name" +"\t" + "Age" + "\t" + "Gender" + "\t" + "Total Balance");
 			while(rs.next()){
 				System.out.println(rs.getInt(1) + "\t" + rs.getString(2) + "\t" + rs.getString(3) + "\t" + rs.getString(4) + "\t" + rs.getInt(5));
 			}
+			rs.close();
+			stmt.close();
+			con.close();
 			System.out.println(":: REPORT A - SUCCESS");
 		}
 		catch (SQLException e){
@@ -590,18 +560,6 @@ public class BankingSystem {
 			System.out.println(":: REPORT A - FAILED");
 			cnfe.printStackTrace();
 			return;
-		}
-		finally{
-			try{
-				rs.close();
-				stmt.close();
-				con.close();
-			}
-			catch (SQLException e){
-				System.out.println("Error closing connection");
-				e.printStackTrace();
-				return;
-			}
 		}
 	}
 
@@ -642,12 +600,16 @@ public class BankingSystem {
 				con = DriverManager.getConnection(url, username, password);
 				stmt = con.createStatement();
 				String query = "SELECT C.age, AVG(A.balance) AS avg_balance FROM CUSTOMER C LEFT JOIN ACCOUNT A ON C.id=A.id WHERE C.age BETWEEN " + n_min + " AND " + n_max + " GROUP BY C.age ORDER BY avg_balance DESC;";
-				rs = stmt.executeQuery(query);
+				stmt.execute(query);
+				rs = stmt.getResultSet();
 				System.out.println("Age" + "\t" + "Average Balance");
 				while(rs.next()){
 					System.out.println(rs.getInt(1) + "\t" + rs.getInt(2));
 				}
-			System.out.println(":: REPORT B - SUCCESS");
+				rs.close();
+				stmt.close();
+				con.close();
+				System.out.println(":: REPORT B - SUCCESS");
 			}
 			catch (SQLException e){
 				System.out.println(":: REPORT B - FAILED");
@@ -658,18 +620,6 @@ public class BankingSystem {
 				System.out.println(":: REPORT B - FAILED");
 				cnfe.printStackTrace();
 				return;
-			}
-			finally{
-				try{
-					rs.close();
-					stmt.close();
-					con.close();
-				}
-				catch (SQLException e){
-					System.out.println("Error closing connection");
-					e.printStackTrace();
-					return;
-				}
 			}
 	}
 }
