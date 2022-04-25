@@ -108,22 +108,21 @@ public class BankingSystem {
 					stmt = con.createStatement();
 					stmt.executeUpdate(query);
 					rs = stmt.getResultSet();
-					if(rs != null){
-						System.out.println(rs.getInt(1));
-						rs.close();
-					}
-					stmt.close();
-					query = "SELECT ID FROM P1.CUSTOMER";
+					// if(rs != null){
+					// 	System.out.println(rs.getInt(1));
+					// 	rs.close();
+					// }
+					
+					query = "SELECT ID FROM P1.CUSTOMER WHERE NAME = '" + name + "' AND PIN = " + n_pin + ";";
 					stmt = con.createStatement();
 					rs = stmt.executeQuery(query);
-					
-					if(rs != null){
-						while(rs.next())
-							System.out.println(rs.getInt(1));
-					}
+					int result = 0;
+					if(rs.next())
+						result = rs.getInt(1);
+					System.out.println("ID: " + result + " added");
+					rs.close();
+					stmt.close();
 					con.close();
-					
-					// System.out.println(rs.getInt(1));
 					
 					
 					System.out.println(":: CREATE NEW CUSTOMER - SUCCESS");
