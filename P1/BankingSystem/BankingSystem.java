@@ -298,7 +298,7 @@ public class BankingSystem {
 				try{
 					if(accNum.isEmpty() || amount.isEmpty())
 					{
-						throw new NullPointerException("Invalid input - Empty");
+						throw new NullPointerException("INVALID AMOUNT - Empty");
 					}
 				} catch(NullPointerException e)
 					{
@@ -309,9 +309,9 @@ public class BankingSystem {
 					n_accNum = Integer.parseInt(accNum);
 					n_amount = Integer.parseInt(amount);
 					if(n_accNum < 1000 || n_amount < 0)
-						throw new IllegalArgumentException("Invalid input - Number");
+						throw new IllegalArgumentException("INVALID AMOUNT");
 					
-				} catch(IllegalArgumentException e)
+				} catch(NumberFormatException e)
 					{
 						e.printStackTrace();
 						return;
@@ -355,7 +355,7 @@ public class BankingSystem {
 				try{
 					if(accNum.isEmpty() || amount.isEmpty())
 					{
-						throw new NullPointerException("Invalid input - Empty");
+						throw new NullPointerException("INVALID AMOUNT - Empty");
 					}
 				} catch(NullPointerException e)
 					{
@@ -366,9 +366,9 @@ public class BankingSystem {
 					n_accNum = Integer.parseInt(accNum);
 					n_amount = Integer.parseInt(amount);
 					if(n_accNum < 1000 || n_amount < 0)
-						throw new IllegalArgumentException("Invalid input - Number");
+						throw new NumberFormatException("INVALID AMOUNT");
 					
-				} catch(IllegalArgumentException e)
+				} catch(NumberFormatException e)
 					{
 						e.printStackTrace();
 						return;
@@ -536,7 +536,7 @@ public class BankingSystem {
 				// rs = stmt.getResultSet();
 				int totalBalance = 0;
 				System.out.println("Account Number\tBalance");
-				System.out.println("-------------\t------");
+				System.out.println("--------------\t------");
 				// if(rs.next()){
 				// 	System.out.println(rs.getInt(1) + "\t\t" + rs.getInt(2));
 				// 	// totalBalance += rs.getInt(2);
@@ -545,25 +545,25 @@ public class BankingSystem {
 				while(rs.next())
 				{
 					if(rs.getString(3).equals("A")){
-						System.out.println(rs.getInt(1) + "\t\t" + rs.getInt(2));
+						System.out.println(rs.getInt(1) + "\t\t\t" + rs.getInt(2));
 						// totalBalance += rs.getInt(2);
-						totalBalance += rs.getInt(2);
+						
 					}
 				}
 				rs.close();
 				stmt.close();
 				con.close();
-				System.out.println("-------------\t------");
-				System.out.println("TOTAL\t\t" + totalBalance);
+				System.out.println("--------------\t------");
+				System.out.println("TOTAL\t\t\t" + totalBalance);
 				System.out.println(":: ACCOUNT SUMMARY - SUCCESS");
 			} catch(SQLException e){
 				System.out.print("SQLException");
 				System.out.println(":: ACCOUNT SUMMARY - FAILED");
 				e.printStackTrace();
 				return;
-			}	catch(ClassNotFoundException cnfe){
-				System.out.println("ClassNotFoundException");
-				cnfe.printStackTrace();
+			}	catch(Exception e){
+				System.out.println("Exception");
+				e.printStackTrace();
 				System.out.println(":: ACCOUNT SUMMARY - FAILED");
 				return;
 			}
@@ -580,7 +580,7 @@ public class BankingSystem {
 			Class.forName(driver);
 			con = DriverManager.getConnection(url, username, password);
 			stmt = con.createStatement();
-			String query = "SELECT c.id, c.name, c.age, c.gender, SUM(a.balance) total_balance FROM customer c INNER JOIN account a ON a.id=c.id ORDER BY total_balance DESC";
+			String query = "SELECT p1.customer.id, p1.customer.name, p1.customer.age, p1.customer.gender, p1.account.balance FROM p1.account JOIN p1.customer ON p1.account.id=p1.customer.id";
 			rs = stmt.executeQuery(query);
 			System.out.println("ID" + "\t" + "Name" +"\t" + "Age" + "\t" + "Gender" + "\t" + "Total Balance");
 			while(rs.next()){
@@ -596,9 +596,9 @@ public class BankingSystem {
 			e.printStackTrace();
 			return;
 		}
-		catch (ClassNotFoundException cnfe){
+		catch (Exception e){
 			System.out.println(":: REPORT A - FAILED");
-			cnfe.printStackTrace();
+			e.printStackTrace();
 			return;
 		}
 	}
@@ -639,7 +639,7 @@ public class BankingSystem {
 				Class.forName(driver);
 				con = DriverManager.getConnection(url, username, password);
 				stmt = con.createStatement();
-				String query = "SELECT c.age, AVG(a.balance) average_balance FROM customer c INNER JOIN account a ON c.id=a.id WHERE c.age BETWEEN " + n_min + " AND " + n_max + " GROUP BY c.age ORDER BY average_balance DESC;";
+				String query = "SELECT p1.customer.age, AVG(p1.account.balance) average_balance FROM p1.customer JOIN p1.account ON p1.customer.id=p1.account.id WHERE p1.customer.age BETWEEN " + n_min + " AND " + n_max + " GROUP BY p1.customer.age ORDER BY average_balance DESC;";
 				rs = stmt.executeQuery(query);
 				System.out.println("Age" + "\t" + "Average Balance");
 				while(rs.next()){
