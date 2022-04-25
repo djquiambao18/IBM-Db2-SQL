@@ -13,3 +13,6 @@ docker cp ./<filename>.sql  <CONTAINER_ID>:./database/config/db2inst1/.
 
 copy from container to machine:
 docker cp <CONTAINER_ID>:./database/config/db2inst1/<filename>.sql .
+
+
+java -cp ";./db2jcc4.jar" ProgramLauncher ./db.properties >test1.out

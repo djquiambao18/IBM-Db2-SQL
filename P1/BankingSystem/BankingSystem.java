@@ -91,7 +91,7 @@ public class BankingSystem {
 				throw new IllegalArgumentException();
 			}
 		}
-		catch(IllegalArgumentException | NullPointerException e){
+		catch(Exception e){
 			System.out.println(":: CREATE NEW CUSTOMER - FAILED");
 			System.out.println("Invalid input" + " " + e.getMessage());
 			e.printStackTrace();
@@ -185,7 +185,7 @@ public class BankingSystem {
 					type = type.toUpperCase();
 					ch_type = type.charAt(0);
 					n_amount = Integer.parseInt(amount);
-					if(ch_type != 'C' || ch_type != 'S' && n_amount < 0 && n_id < 100)
+					if((ch_type != 'C' || ch_type != 'S') && n_amount < 0 && n_id < 100)
 					{
 						throw new IllegalArgumentException("Invalid input - Type");
 					}
@@ -197,29 +197,23 @@ public class BankingSystem {
 					return;
 				}
 				try {
-					if(ch_type != 'C' || ch_type != 'S' && n_amount < 0 && n_id < 100){
+					
 						Class.forName(driver);
 						con = DriverManager.getConnection(url, username, password);
 						stmt = con.createStatement();
 						String query = "INSERT INTO p1.account (id, type, balance, status) VALUES (" 
 										+ n_id + ", '" + ch_type + "', " + n_amount + ", 'A');"; //A for active, I for Inactive
-						if(stmt.execute(query)){
-							rs = stmt.getResultSet();
-							int rs_number = rs.getInt(1);
-							System.out.println(rs_number);
-							rs.close();
-						}
-						
-						
-						
-						System.out.println(":: OPEN ACCOUNT - SUCCESS");
-						
+						stmt.executeUpdate(query);
+						query = "SELECT number FROM P1.ACCOUNT WHERE ID = " + n_id + " AND TYPE = '" + ch_type + "';";
+						rs = stmt.executeQuery(query);
+						if(rs.next())
+							System.out.println("Account number: " + rs.getInt(1) + " added");
+
+						rs.close();
 						stmt.close();
 						con.close();
-						
+						System.out.println(":: OPEN ACCOUNT - SUCCESS");
 						return;
-						
-					}
 
 				} catch(SQLException e){
 					System.out.print("SQLException");
@@ -233,7 +227,6 @@ public class BankingSystem {
 					e.printStackTrace();
 					return;
 				}
-		
 	}
 
 	/**
@@ -271,8 +264,12 @@ public class BankingSystem {
 					stmt = con.createStatement();
 					// Set Status to I for account number and set amount to 0
 					String query = "UPDATE p1.account SET status = 'I', balance = 0 WHERE number = " + n_accNum + ";";
-					stmt.execute(query);
-					rs = stmt.getResultSet();
+					stmt.executeUpdate(query);
+					// rs = stmt.getResultSet();
+					query = "SELECT * FROM p1.account WHERE number = " + n_accNum + ";";
+					rs = stmt.executeQuery(query);
+					if(rs.next())
+						System.out.println("Account number: " + rs.getInt(1) + " closed");
 					rs.close();
 					stmt.close();
 					con.close();
@@ -325,9 +322,9 @@ public class BankingSystem {
 					stmt = con.createStatement();
 					// Set balance to balance + amount
 					String query = "UPDATE p1.account SET balance = balance + " + n_amount + " WHERE number = " + n_accNum + ";";
-					stmt.execute(query);
-					rs = stmt.getResultSet();
-					rs.close();
+					stmt.executeUpdate(query);
+					// rs = stmt.getResultSet();
+					// rs.close();
 					stmt.close();
 					con.close();
 					System.out.println(":: DEPOSIT - SUCCESS");
@@ -337,13 +334,12 @@ public class BankingSystem {
 					e.printStackTrace();
 					return;
 				}
-				catch(ClassNotFoundException cnfe){
-					System.out.println("ClassNotFoundException");
-					cnfe.printStackTrace();
+				catch(Exception e){
+					System.out.println("Exception");
+					e.printStackTrace();
 					System.out.println(":: DEPOSIT - FAILED");
 					return;
 				}
-				
 	}
 
 	/**
@@ -382,9 +378,18 @@ public class BankingSystem {
 					con = DriverManager.getConnection(url, username, password);
 					stmt = con.createStatement();
 					// Set balance to balance - amount
-					String query = "UPDATE p1.account SET balance = balance - " + n_amount + " WHERE number = " + n_accNum + ";";
-					stmt.execute(query);
-					rs = stmt.getResultSet();
+					String query = "SELECT balance FROM P1.account WHERE number = " + n_accNum + ";";
+					rs = stmt.executeQuery(query);
+					if(rs.next()){
+						if((rs.getInt(1) - n_amount) < 0){
+							System.out.println("Balance is not enough");
+							return;
+						}
+					}
+					
+					query = "UPDATE p1.account SET balance = balance - " + n_amount + " WHERE number = " + n_accNum + ";";
+					stmt.executeUpdate(query);
+					// rs = stmt.getResultSet();
 					rs.close();
 					stmt.close();
 					con.close();
@@ -394,9 +399,9 @@ public class BankingSystem {
 					System.out.println(":: WITHDRAW - FAILED");
 					e.printStackTrace();
 					return;
-				}	catch(ClassNotFoundException cnfe){
-					System.out.println("ClassNotFoundException");
-					cnfe.printStackTrace();
+				}	catch(Exception e){
+					System.out.println("Exception");
+					e.printStackTrace();
 					System.out.println(":: WITHDRAW - FAILED");
 					return;
 				}
@@ -441,17 +446,44 @@ public class BankingSystem {
 					Class.forName(driver);
 					con = DriverManager.getConnection(url, username, password);
 					stmt = con.createStatement();
+
 					// Set balance to balance - amount
-					String query = "UPDATE p1.account SET balance = balance - " + n_amount + " WHERE number = " + n_srcAccNum + ";";
-					stmt.execute(query);
-					rs = stmt.getResultSet();
+					String query = "SELECT balance FROM p1.account WHERE number = " + n_srcAccNum + ";";
+					rs = stmt.executeQuery(query);
+					int tempBal = 0;
+					if(rs.next()){
+						tempBal = rs.getInt(1);
+						if((tempBal - n_amount) < 0){
+							return;
+						}
+						else
+						{
+							query = "UPDATE p1.account SET balance = balance - " + n_amount + " WHERE number = " + n_srcAccNum + ";";
+							stmt.executeUpdate(query);
+						}
+
+					}
+					
+					query = "SELECT balance FROM p1.account WHERE number = " + n_destAccNum + ";";
+					rs = stmt.executeQuery(query);
+					if(rs.next()){
+						tempBal = rs.getInt(1);
+						query = "UPDATE p1.account SET balance = balance + " + n_amount + " WHERE number = " + n_destAccNum + ";";
+						stmt.executeUpdate(query);
+					}
+					// rs = stmt.getResultSet();
+
+					// rs.close();
+					
 					// Set balance to balance + amount
-					query = "UPDATE p1.account SET balance = balance + " + n_amount + " WHERE number = " + n_destAccNum + ";";
-					stmt.execute(query);
-					rs = stmt.getResultSet();
+					// query = "UPDATE p1.account SET balance = balance + " + n_amount + " WHERE number = " + n_destAccNum + ";";
+					// stmt.executeUpdate(query);
+					// rs = stmt.getResultSet();
+
 					rs.close();
 					stmt.close();
 					con.close();
+
 				System.out.println(":: TRANSFER - SUCCESS");
 				} catch(SQLException e){
 					System.out.print("SQLException");
@@ -487,8 +519,8 @@ public class BankingSystem {
 			}
 		try{
 			n_cusID = Integer.parseInt(cusID);
-			if(n_cusID < 1000)
-				throw new IllegalArgumentException("Invalid customer ID");
+		// 	if(n_cusID < 100 || n_cusID != 0)
+		// 		throw new IllegalArgumentException("Invalid customer ID");
 			
 		} catch(IllegalArgumentException e)
 			{
@@ -499,20 +531,30 @@ public class BankingSystem {
 				Class.forName(driver);
 				con = DriverManager.getConnection(url, username, password);
 				stmt = con.createStatement();
-				String query = "SELECT number, balance FROM p1.account WHERE customer_id = " + n_cusID + ";";
-				stmt.execute(query);
-				rs = stmt.getResultSet();
+				String query = "SELECT number, balance, status FROM p1.account WHERE id = " + n_cusID + ";";
+				rs = stmt.executeQuery(query);
+				// rs = stmt.getResultSet();
 				int totalBalance = 0;
 				System.out.println("Account Number\tBalance");
+				System.out.println("-------------\t------");
+				// if(rs.next()){
+				// 	System.out.println(rs.getInt(1) + "\t\t" + rs.getInt(2));
+				// 	// totalBalance += rs.getInt(2);
+				// 	totalBalance += rs.getInt(2);
+				// }
 				while(rs.next())
 				{
-					System.out.println(rs.getInt(1) + "\t\t" + rs.getInt(2));
-					totalBalance += rs.getInt(2);
+					if(rs.getString(3).equals("A")){
+						System.out.println(rs.getInt(1) + "\t\t" + rs.getInt(2));
+						// totalBalance += rs.getInt(2);
+						totalBalance += rs.getInt(2);
+					}
 				}
 				rs.close();
 				stmt.close();
 				con.close();
-				System.out.println("Total Balance\t" + totalBalance);
+				System.out.println("-------------\t------");
+				System.out.println("TOTAL\t\t" + totalBalance);
 				System.out.println(":: ACCOUNT SUMMARY - SUCCESS");
 			} catch(SQLException e){
 				System.out.print("SQLException");
@@ -538,9 +580,8 @@ public class BankingSystem {
 			Class.forName(driver);
 			con = DriverManager.getConnection(url, username, password);
 			stmt = con.createStatement();
-			String query = "SELECT C.id, C.name, C.age, C.gender, SUM(A.balance) AS total FROM CUSTOMER C LEFT JOIN ACCOUNT A ON C.id=A.id ORDER BY total DESC";
-			stmt.execute(query);
-			rs = stmt.getResultSet();
+			String query = "SELECT c.id, c.name, c.age, c.gender, SUM(a.balance) total_balance FROM customer c INNER JOIN account a ON a.id=c.id ORDER BY total_balance DESC";
+			rs = stmt.executeQuery(query);
 			System.out.println("ID" + "\t" + "Name" +"\t" + "Age" + "\t" + "Gender" + "\t" + "Total Balance");
 			while(rs.next()){
 				System.out.println(rs.getInt(1) + "\t" + rs.getString(2) + "\t" + rs.getString(3) + "\t" + rs.getString(4) + "\t" + rs.getInt(5));
@@ -598,9 +639,8 @@ public class BankingSystem {
 				Class.forName(driver);
 				con = DriverManager.getConnection(url, username, password);
 				stmt = con.createStatement();
-				String query = "SELECT C.age, AVG(A.balance) AS avg_balance FROM CUSTOMER C LEFT JOIN ACCOUNT A ON C.id=A.id WHERE C.age BETWEEN " + n_min + " AND " + n_max + " GROUP BY C.age ORDER BY avg_balance DESC;";
-				stmt.execute(query);
-				rs = stmt.getResultSet();
+				String query = "SELECT c.age, AVG(a.balance) average_balance FROM customer c INNER JOIN account a ON c.id=a.id WHERE c.age BETWEEN " + n_min + " AND " + n_max + " GROUP BY c.age ORDER BY average_balance DESC;";
+				rs = stmt.executeQuery(query);
 				System.out.println("Age" + "\t" + "Average Balance");
 				while(rs.next()){
 					System.out.println(rs.getInt(1) + "\t" + rs.getInt(2));
