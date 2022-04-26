@@ -1,0 +1,267 @@
+:: PROGRAM START
+:: TEST - CONNECTING TO DATABASE
+:: TEST - SUCCESSFULLY CONNECTED TO DATABASE
+
+:: CREATE NEW CUSTOMER - RUNNING
+ID: 100 added
+:: CREATE NEW CUSTOMER - SUCCESS
+
+:: CREATE NEW CUSTOMER - RUNNING
+ID: 101 added
+:: CREATE NEW CUSTOMER - SUCCESS
+
+:: CREATE NEW CUSTOMER - RUNNING
+ID: 102 added
+:: CREATE NEW CUSTOMER - SUCCESS
+
+:: CREATE NEW CUSTOMER - RUNNING
+ID: 103 added
+:: CREATE NEW CUSTOMER - SUCCESS
+
+:: CREATE NEW CUSTOMER - RUNNING
+ID: 104 added
+:: CREATE NEW CUSTOMER - SUCCESS
+
+:: CREATE NEW CUSTOMER - RUNNING
+ID: 105 added
+:: CREATE NEW CUSTOMER - SUCCESS
+
+:: OPEN ACCOUNT - RUNNING
+Account number: 1000 added
+:: OPEN ACCOUNT - SUCCESS
+
+:: OPEN ACCOUNT - RUNNING
+Account number: 1001 added
+:: OPEN ACCOUNT - SUCCESS
+
+:: OPEN ACCOUNT - RUNNING
+Account number: 1002 added
+:: OPEN ACCOUNT - SUCCESS
+
+:: OPEN ACCOUNT - RUNNING
+Account number: 1003 added
+:: OPEN ACCOUNT - SUCCESS
+
+:: OPEN ACCOUNT - RUNNING
+Account number: 1004 added
+:: OPEN ACCOUNT - SUCCESS
+
+:: OPEN ACCOUNT - RUNNING
+Account number: 1005 added
+:: OPEN ACCOUNT - SUCCESS
+
+:: OPEN ACCOUNT - RUNNING
+Account number: 1006 added
+:: OPEN ACCOUNT - SUCCESS
+
+:: OPEN ACCOUNT - RUNNING
+Account number: 1007 added
+:: OPEN ACCOUNT - SUCCESS
+
+:: OPEN ACCOUNT - RUNNING
+Account number: 1007 added
+:: OPEN ACCOUNT - SUCCESS
+
+:: OPEN ACCOUNT - RUNNING
+Account number: 1009 added
+:: OPEN ACCOUNT - SUCCESS
+
+:: OPEN ACCOUNT - RUNNING
+Account number: 1010 added
+:: OPEN ACCOUNT - SUCCESS
+
+:: OPEN ACCOUNT - RUNNING
+Account number: 1010 added
+:: OPEN ACCOUNT - SUCCESS
+
+:: ACCOUNT SUMMARY - RUNNING
+NUMBER		BALANCE
+--------------------
+1001			2500
+1013			25
+--------------------
+TOTAL: 		2525
+:: ACCOUNT SUMMARY - SUCCESS
+
+:: ACCOUNT SUMMARY - RUNNING
+NUMBER		BALANCE
+--------------------
+1009			5100
+1010			14000
+1021			5100
+1022			8000
+1023			7000
+--------------------
+TOTAL: 		39200
+:: ACCOUNT SUMMARY - SUCCESS
+
+:: DEPOSIT - RUNNING
+:: DEPOSIT - SUCCESS
+
+:: ACCOUNT SUMMARY - RUNNING
+NUMBER		BALANCE
+--------------------
+1000			120
+1012			100
+--------------------
+TOTAL: 		220
+:: ACCOUNT SUMMARY - SUCCESS
+
+:: DEPOSIT - RUNNING
+:: DEPOSIT - SUCCESS
+
+:: ACCOUNT SUMMARY - RUNNING
+NUMBER		BALANCE
+--------------------
+1001			4975
+1013			25
+--------------------
+TOTAL: 		5000
+:: ACCOUNT SUMMARY - SUCCESS
+
+:: WITHDRAW - RUNNING
+:: WITHDRAW - SUCCESS
+
+:: ACCOUNT SUMMARY - RUNNING
+NUMBER		BALANCE
+--------------------
+1002			100
+1003			9500
+1014			500
+1015			10000
+--------------------
+TOTAL: 		20100
+:: ACCOUNT SUMMARY - SUCCESS
+
+:: WITHDRAW - RUNNING
+:: WITHDRAW - SUCCESS
+
+:: ACCOUNT SUMMARY - RUNNING
+NUMBER		BALANCE
+--------------------
+1004			1000
+1005			4237
+1016			1000
+1017			7777
+--------------------
+TOTAL: 		14014
+:: ACCOUNT SUMMARY - SUCCESS
+
+:: TRANSFER - RUNNING
+:: TRANSFER - SUCCESS
+
+:: ACCOUNT SUMMARY - RUNNING
+NUMBER		BALANCE
+--------------------
+1002			100
+1003			9000
+1014			500
+1015			10000
+--------------------
+TOTAL: 		19600
+:: ACCOUNT SUMMARY - SUCCESS
+
+:: ACCOUNT SUMMARY - RUNNING
+NUMBER		BALANCE
+--------------------
+1007			10000
+1008			4500
+1018			3000
+1019			9000
+1020			4500
+--------------------
+TOTAL: 		31000
+:: ACCOUNT SUMMARY - SUCCESS
+
+:: TRANSFER - RUNNING
+:: TRANSFER - ERROR - NOT ENOUGH FUNDS
+
+:: ACCOUNT SUMMARY - RUNNING
+NUMBER		BALANCE
+--------------------
+1009			5100
+1010			14000
+1021			5100
+1022			8000
+1023			7000
+--------------------
+TOTAL: 		39200
+:: ACCOUNT SUMMARY - SUCCESS
+
+:: CLOSE ACCOUNT - RUNNING
+:: CLOSE ACCOUNT - SUCCESS
+
+:: ACCOUNT SUMMARY - RUNNING
+NUMBER		BALANCE
+--------------------
+1007			10000
+1008			4500
+1018			3000
+1019			9000
+1020			4500
+--------------------
+TOTAL: 		31000
+:: ACCOUNT SUMMARY - SUCCESS
+
+:: CLOSE ACCOUNT - RUNNING
+:: CLOSE ACCOUNT - SUCCESS
+
+:: ACCOUNT SUMMARY - RUNNING
+NUMBER		BALANCE
+--------------------
+1009			5100
+1010			14000
+1021			5100
+1022			8000
+1023			7000
+--------------------
+TOTAL: 		39200
+:: ACCOUNT SUMMARY - SUCCESS
+
+:: REPORT A - RUNNING
+ID 		Name                 	Age 		Gender 		Total Balance
+-----------------------------------------------------------------
+105 	Jenny                	30         F 			39200
+104 	Joy                  	27         F 			31000
+102 	Misty                	12         F 			19600
+103 	Brock                	17         M 			14014
+101 	Pikachu              	25         M 			5000
+100 	Ash                  	10         M 			220
+-----------------------------------------------------------------
+:: REPORT A - SUCCESS
+
+:: REPORT B - RUNNING
+AVERAGE BALANCE
+------------------------
+11278
+------------------------
+:: REPORT B - SUCCESS
+
+:: DEPOSIT - RUNNING
+:: DEPOSIT - ERROR - INVALID AMOUNT
+
+:: WITHDRAW - RUNNING
+:: WITHDRAW - ERROR - INVALID AMOUNT
+
+:: CREATE NEW CUSTOMER - RUNNING
+:: CREATE NEW CUSTOMER - ERROR - INVALID PIN
+
+:: WITHDRAW - RUNNING
+:: WITHDRAW - ERROR - NOT ENOUGH FUNDS
+
+:: TRANSFER - RUNNING
+:: TRANSFER - ERROR - NOT ENOUGH FUNDS
+
+:: REPORT A - RUNNING
+ID 		Name                 	Age 		Gender 		Total Balance
+-----------------------------------------------------------------
+105 	Jenny                	30         F 			39200
+104 	Joy                  	27         F 			31000
+102 	Misty                	12         F 			19600
+103 	Brock                	17         M 			14014
+101 	Pikachu              	25         M 			5000
+100 	Ash                  	10         M 			220
+-----------------------------------------------------------------
+:: REPORT A - SUCCESS
+
+:: PROGRAM END
