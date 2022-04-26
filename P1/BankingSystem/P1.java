@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Scanner;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -134,71 +136,191 @@ public class P1 {
         adminScreen();
       }
       else{
-      stmt = conn.createStatement();
-      String query = "SELECT * FROM P1.customer WHERE id = " + customerID + " AND pin = " + pin;
-      rs = stmt.executeQuery(query);
-      if(rs.next()){
-        System.out.println("Welcome " + rs.getString("name") + "!");
-        System.out.println("1. Open Account");
-        System.out.println("2. Close Account");
-        System.out.println("3. Deposit");
-        System.out.println("4. Withdraw");
-        System.out.println("5. Transfer");
-        System.out.println("6. Account Summary");
-        System.out.println("7. Exit");
-        Scanner sc = new Scanner(System.in);
-        int choice = 0;
-        while(choice != 7){
-          System.out.println("Enter your choice: ");
-          choice = sc.nextInt();
-          sc.nextLine();
-          switch(choice){
-            case 1 -> {
-              System.out.println("Open Account");
-              try{
-                System.out.print("\nEnter customer ID: ");
-                String cid = sc.nextLine();
-                System.out.print("\nEnter account type ('C' for Checking or 'S' for Savings): ");
-                String type = sc.nextLine();
-                System.out.print("\nEnter balance (initial deposit): ");
-                String balance = sc.nextLine();
-                BankingSystem.openAccount(cid, type, balance);
-              }catch(Exception e){
-                System.out.println("EXCEPTION CAUGHT - Invalid input. Returning to main menu...");
-                sc.close();
-                return;
+        try{
+          stmt = conn.createStatement();
+          String query = "SELECT * FROM P1.customer WHERE id = " + customerID + " AND pin = " + pin;
+          rs = stmt.executeQuery(query);
+          if(rs.next()){
+            System.out.println("Welcome " + rs.getString("name") + "!");
+            System.out.println("1. Open Account");
+            System.out.println("2. Close Account");
+            System.out.println("3. Deposit");
+            System.out.println("4. Withdraw");
+            System.out.println("5. Transfer");
+            System.out.println("6. Account Summary");
+            System.out.println("7. Exit");
+            Scanner sc = new Scanner(System.in);
+            int choice = 0;
+            while(choice != 7){
+              System.out.println("Enter your choice: ");
+              choice = sc.nextInt();
+              sc.nextLine();
+              switch(choice){
+                case 1 -> {
+                  System.out.println("Open Account");
+                  try{
+                    System.out.print("\nEnter customer ID: ");
+                    String cid = sc.nextLine();
+                    System.out.print("\nEnter account type ('C' for Checking or 'S' for Savings): ");
+                    String type = sc.nextLine();
+                    System.out.print("\nEnter balance (initial deposit): ");
+                    String balance = sc.nextLine();
+                    BankingSystem.openAccount(cid, type, balance);
+                  }catch(Exception e){
+                    System.out.println("EXCEPTION CAUGHT - Invalid input. Returning to main menu...");
+                    sc.close();
+                    return;
+                  }
+                  
+                }
+                case 2 -> {
+                  System.out.println("Close Account");
+                  try{
+                    stmt = conn.createStatement();
+                    query = "SELECT number FROM P1.account WHERE customer_id = " + customerID;
+                    rs = stmt.executeQuery(query);
+                    HashSet<String> accountNumbers = new HashSet<String>();
+                    while(rs.next()){
+                      accountNumbers.add(rs.getString(1));
+                    }
+                    System.out.print("\nEnter account number: ");
+                    String account = sc.nextLine();
+                    
+                    if(accountNumbers.contains(account)){
+                      BankingSystem.closeAccount(account);
+                    }
+                    else{
+                      System.out.println("Invalid account number.");
+                    }
+                    
+                  }catch(Exception e){
+                    System.out.println("EXCEPTION CAUGHT - Invalid input. Returning to main menu...");
+                    sc.close();
+                    return;
+                  }
+                  
+                }
+                case 3 -> {
+                  System.out.println("Deposit");
+                  try{
+                    stmt = conn.createStatement();
+                    query = "SELECT number FROM P1.account";
+                    rs = stmt.executeQuery(query);
+                    HashSet<String> accountNumbers = new HashSet<String>();
+                    while(rs.next()){
+                      accountNumbers.add(rs.getString(1));
+                    }
+                    System.out.print("\nEnter account number: ");
+                    String account = sc.nextLine();
+                    if(accountNumbers.contains(account)){
+                      System.out.print("\nEnter deposit amount: ");
+                      String amount = sc.nextLine();
+                      BankingSystem.deposit(account, amount);
+                    }
+                    else{
+                      System.out.println("Invalid account number.");
+                    }
+                  }catch(Exception e){
+                    System.out.println("EXCEPTION CAUGHT - Invalid input. Returning to main menu...");
+                    sc.close();
+                    return;
+                  }
+                }
+                case 4 -> {
+                  System.out.println("Withdraw");
+                  try{
+                    stmt = conn.createStatement();
+                    query = "SELECT number FROM P1.account WHERE id = " + customerID;
+                    rs = stmt.executeQuery(query);
+                    HashSet<String> accountNumbers = new HashSet<String>();
+                    while(rs.next()){
+                      accountNumbers.add(rs.getString(1));
+                    }
+                    System.out.print("\nEnter account number: ");
+                    String account = sc.nextLine();
+                    if(accountNumbers.contains(account)){
+                      System.out.print("\nEnter withdraw amount: ");
+                      String amount = sc.nextLine();
+                      BankingSystem.withdraw(account, amount);
+                    }
+                    else{
+                      System.out.println("Invalid account number.");
+                    }
+                  }catch(Exception e){
+                    System.out.println("EXCEPTION CAUGHT - Invalid input. Returning to main menu...");
+                    sc.close();
+                    return;
+                  }
+                }
+                case 5 -> {
+                  System.out.println("Transfer");
+                  try{
+                    stmt = conn.createStatement();
+                    query = "SELECT number FROM P1.account";
+                    rs = stmt.executeQuery(query);
+                    HashSet<String> accountNumbers = new HashSet<String>();
+                    while(rs.next()){
+                      accountNumbers.add(rs.getString(1));
+                    }
+                    stmt = conn.createStatement();
+                    query = "SELECT number FROM P1.account WHERE id = " + customerID;
+                    rs = stmt.executeQuery(query);
+                    HashSet<String> customerAccountNumbers = new HashSet<String>();
+                    while(rs.next()){
+                      customerAccountNumbers.add(rs.getString(1));
+                    }
+                    System.out.print("\nEnter source account number: ");
+                    String source = sc.nextLine();
+                    if(customerAccountNumbers.contains(source)){
+                      System.out.print("\nEnter destination account number: ");
+                      String destination = sc.nextLine();
+                      if(accountNumbers.contains(destination)){
+                        System.out.print("\nEnter transfer amount: ");
+                        String amount = sc.nextLine();
+                        BankingSystem.transfer(source, destination, amount);
+                      }
+                      else{
+                        System.out.println("Invalid destination account number.");
+                      }
+                    }
+                    else{
+                      System.out.println("Invalid source account number.");
+                    }
+                  }catch(Exception e){
+                    System.out.println("EXCEPTION CAUGHT - Invalid input. Returning to main menu...");
+                    sc.close();
+                    return;
+                  }
+                }
+                case 6 -> {
+                  System.out.println("Account Summary");
+                  BankingSystem.accountSummary(Integer.toString(customerID));
+                }
               }
-              
             }
-            case 2 -> {
-              BankingSystem.closeAccount(customerID);
-            }
-            case 3 -> {
-              BankingSystem.deposit(customerID);
-            }
-            case 4 -> {
-              BankingSystem.withdraw(customerID);
-            }
-            case 5 -> {
-              BankingSystem.transfer(customerID);
-            }
-            case 6 -> {
-              BankingSystem.accountSummary(customerID);
-            }
+            sc.close();
           }
-        }
-        sc.close();
+          else{
+            System.out.println("Invalid customer ID or pin.  Returning to main menu...");
+          }
+      }catch(SQLException e){
+        System.out.println("SQL Exception. Returning to main menu...");
+        return;
       }
-      else{
-        System.out.println("Invalid customer ID or pin.  Returning to main menu...");
-      }
-
     }
   }
 
   //Admin Screen:
   static void adminScreen(){
     System.out.println("Administrator Main Menu");
+    /*
+          Screen # 4 (Title - Administrator Main Menu)
+      1.	Account Summary for a Customer
+      2.	Report A :: Customer Information with Total Balance in Decreasing Order
+      3.	Report B :: Find the Average Total Balance Between Age Groups
+      4.	Exit
+    */
+    
   }
 
 }

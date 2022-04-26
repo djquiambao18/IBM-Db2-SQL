@@ -639,7 +639,7 @@ public class BankingSystem {
 			stmt = con.createStatement();
 
 			// display each customer information and its total balance in decreasing order.
-			String query = "SELECT p1.customer.id, p1.customer.name, p1.customer.age, p1.customer.gender, SUM(p1.account.balance) total FROM p1.account, p1.customer WHERE p1.account.id = p1.customer.id GROUP BY p1.customer.id, p1.customer.name, p1.customer.age, p1.customer.gender ORDER BY total DESC;";
+			String query = "SELECT p1.customer.id, p1.customer.name, p1.customer.age, p1.customer.gender, SUM(p1.account.balance) total FROM p1.account, p1.customer WHERE p1.account.id = p1.customer.id AND p1.account.status = 'A' GROUP BY p1.customer.id, p1.customer.name, p1.customer.age, p1.customer.gender ORDER BY total DESC;";
 			// String query = "SELECT p1.customer.id, p1.customer.name, p1.customer.age, p1.customer.age, (SELECT SUM(p1.account.balance) total FROM p1.account, p1.customer WHERE p1.account.id = p1.customer.id GROUP BY p1.customer.id ORDER BY total DESC) FROM p1.customer;";
 
 			rs = stmt.executeQuery(query);
