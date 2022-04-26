@@ -77,22 +77,19 @@ Account number: 1010 added
 :: ACCOUNT SUMMARY - RUNNING
 NUMBER		BALANCE
 --------------------
-1001			2500
-1013			25
+1001			25
 --------------------
-TOTAL: 		2525
+TOTAL: 		25
 :: ACCOUNT SUMMARY - SUCCESS
 
 :: ACCOUNT SUMMARY - RUNNING
 NUMBER		BALANCE
 --------------------
 1009			5100
-1010			14000
-1021			5100
-1022			8000
-1023			7000
+1010			8000
+1011			7000
 --------------------
-TOTAL: 		39200
+TOTAL: 		20100
 :: ACCOUNT SUMMARY - SUCCESS
 
 :: DEPOSIT - RUNNING
@@ -101,10 +98,9 @@ TOTAL: 		39200
 :: ACCOUNT SUMMARY - RUNNING
 NUMBER		BALANCE
 --------------------
-1000			120
-1012			100
+1000			110
 --------------------
-TOTAL: 		220
+TOTAL: 		110
 :: ACCOUNT SUMMARY - SUCCESS
 
 :: DEPOSIT - RUNNING
@@ -113,10 +109,9 @@ TOTAL: 		220
 :: ACCOUNT SUMMARY - RUNNING
 NUMBER		BALANCE
 --------------------
-1001			4975
-1013			25
+1001			2500
 --------------------
-TOTAL: 		5000
+TOTAL: 		2500
 :: ACCOUNT SUMMARY - SUCCESS
 
 :: WITHDRAW - RUNNING
@@ -125,12 +120,10 @@ TOTAL: 		5000
 :: ACCOUNT SUMMARY - RUNNING
 NUMBER		BALANCE
 --------------------
-1002			100
-1003			9500
-1014			500
-1015			10000
+1002			300
+1003			10000
 --------------------
-TOTAL: 		20100
+TOTAL: 		10300
 :: ACCOUNT SUMMARY - SUCCESS
 
 :: WITHDRAW - RUNNING
@@ -140,11 +133,9 @@ TOTAL: 		20100
 NUMBER		BALANCE
 --------------------
 1004			1000
-1005			4237
-1016			1000
-1017			7777
+1005			6007
 --------------------
-TOTAL: 		14014
+TOTAL: 		7007
 :: ACCOUNT SUMMARY - SUCCESS
 
 :: TRANSFER - RUNNING
@@ -153,39 +144,33 @@ TOTAL: 		14014
 :: ACCOUNT SUMMARY - RUNNING
 NUMBER		BALANCE
 --------------------
-1002			100
-1003			9000
-1014			500
-1015			10000
+1002			300
+1003			9500
 --------------------
-TOTAL: 		19600
+TOTAL: 		9800
 :: ACCOUNT SUMMARY - SUCCESS
 
 :: ACCOUNT SUMMARY - RUNNING
 NUMBER		BALANCE
 --------------------
-1007			10000
+1006			3000
+1007			9500
 1008			4500
-1018			3000
-1019			9000
-1020			4500
 --------------------
-TOTAL: 		31000
+TOTAL: 		17000
 :: ACCOUNT SUMMARY - SUCCESS
 
 :: TRANSFER - RUNNING
-:: TRANSFER - ERROR - NOT ENOUGH FUNDS
+:: TRANSFER - SUCCESS
 
 :: ACCOUNT SUMMARY - RUNNING
 NUMBER		BALANCE
 --------------------
 1009			5100
 1010			14000
-1021			5100
-1022			8000
-1023			7000
+1011			1000
 --------------------
-TOTAL: 		39200
+TOTAL: 		20100
 :: ACCOUNT SUMMARY - SUCCESS
 
 :: CLOSE ACCOUNT - RUNNING
@@ -194,13 +179,10 @@ TOTAL: 		39200
 :: ACCOUNT SUMMARY - RUNNING
 NUMBER		BALANCE
 --------------------
-1007			10000
+1007			9500
 1008			4500
-1018			3000
-1019			9000
-1020			4500
 --------------------
-TOTAL: 		31000
+TOTAL: 		14000
 :: ACCOUNT SUMMARY - SUCCESS
 
 :: CLOSE ACCOUNT - RUNNING
@@ -211,29 +193,26 @@ NUMBER		BALANCE
 --------------------
 1009			5100
 1010			14000
-1021			5100
-1022			8000
-1023			7000
 --------------------
-TOTAL: 		39200
+TOTAL: 		19100
 :: ACCOUNT SUMMARY - SUCCESS
 
 :: REPORT A - RUNNING
 ID 		Name                 	Age 		Gender 		Total Balance
 -----------------------------------------------------------------
-105 	Jenny                	30         F 			39200
-104 	Joy                  	27         F 			31000
-102 	Misty                	12         F 			19600
-103 	Brock                	17         M 			14014
-101 	Pikachu              	25         M 			5000
-100 	Ash                  	10         M 			220
+105 	Jenny                	30         F 			19100
+104 	Joy                  	27         F 			14000
+102 	Misty                	12         F 			9800
+103 	Brock                	17         M 			7007
+101 	Pikachu              	25         M 			2500
+100 	Ash                  	10         M 			110
 -----------------------------------------------------------------
 :: REPORT A - SUCCESS
 
 :: REPORT B - RUNNING
 AVERAGE BALANCE
 ------------------------
-11278
+5639
 ------------------------
 :: REPORT B - SUCCESS
 
@@ -255,12 +234,12 @@ AVERAGE BALANCE
 :: REPORT A - RUNNING
 ID 		Name                 	Age 		Gender 		Total Balance
 -----------------------------------------------------------------
-105 	Jenny                	30         F 			39200
-104 	Joy                  	27         F 			31000
-102 	Misty                	12         F 			19600
-103 	Brock                	17         M 			14014
-101 	Pikachu              	25         M 			5000
-100 	Ash                  	10         M 			220
+105 	Jenny                	30         F 			19100
+104 	Joy                  	27         F 			14000
+102 	Misty                	12         F 			9800
+103 	Brock                	17         M 			7007
+101 	Pikachu              	25         M 			2500
+100 	Ash                  	10         M 			110
 -----------------------------------------------------------------
 :: REPORT A - SUCCESS
 
