@@ -16,3 +16,5 @@ docker cp <CONTAINER_ID>:./database/config/db2inst1/<filename>.sql .
 
 
 java -cp ";./db2jcc4.jar" ProgramLauncher ./db.properties >test1.out
+
+java -cp ";./db2jcc4.jar" P1 ./db.properties
