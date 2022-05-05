@@ -28,11 +28,15 @@ LANGUAGE SQL
       SET sql_code = -100;
       SET err_msg = 'Invalid pin';
     ELSE
-      SET err_msg = 'ADD your insert statement and code to get & set the output CUSTOMER ID here !!!';
+      INSERT INTO p2.customer (Name, Gender, Age, Pin) VALUES (p_name, p_gender, p_age, p_pin);
+      SET err_msg = id;
       SET sql_code = 0;
     END IF;
 END@
 --
+
+CREATE PROCEDURE P2.CUST_LOGIN
+(IN p_pin INTEGER, IN p_id INTEGER, OUT )
 TERMINATE@
 --
 --
