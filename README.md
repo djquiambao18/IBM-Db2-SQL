@@ -5,4 +5,5 @@
   <li>HW2</li>
   <li>HW3</li>
   <li>P1 - JDBC & SQL (Db2)</li>
+  <li>P2 - SQL/PL & Stored Procedures (Db2)</li>
 </ul>
