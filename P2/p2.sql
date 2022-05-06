@@ -84,10 +84,90 @@ LANGUAGE SQL
       SET sql_code = -100;
       SET err_msg = 'Invalid type';
     ELSE
-      INSERT INTO p2.account (Id, Balance, Type) VALUES (p_id, p_balance, p_type);
+      INSERT INTO p2.account (Id, Balance, Type, Status) VALUES (p_id, p_balance, p_type, 'A');
       SET p_number = SELECT Number FROM P2.account WHERE ID = p_id AND Type = p_type;
       SET sql_code = 0;
       SET err_msg = p_number;
+    END IF;
+END@
+
+CREATE PROCEDURE P2.ACCT_CLS
+(IN p_number INTEGER, OUT sql_code INTEGER, OUT err_msg CHAR(100))
+LANGUAGE SQL
+  BEGIN
+    IF p_number < 1000 THEN
+      SET sql_code = -100;
+      SET err_msg = 'Invalid account number';
+    ELSE
+      UPDATE p2.account SET Status = 'I', Balance = 0 WHERE Number = p_number;
+      SET sql_code = 0;
+      SET err_msg = 'Account closed';
+    END IF;
+END@
+
+CREATE PROCEDURE P2.ACCT_DEP
+(IN p_number INTEGER, IN p_amt INTEGER, OUT sql_code INTEGER, OUT err_msg CHAR(100))
+LANGUAGE SQL
+  BEGIN
+    IF p_number < 1000 THEN
+      SET sql_code = -100;
+      SET err_msg = 'Invalid account number';
+    ELSEIF p_amt < 0 THEN
+      SET sql_code = -100;
+      SET err_msg = 'Invalid amount';
+    ELSE
+      UPDATE p2.account SET Balance = Balance + p_amt WHERE Number = p_number;
+      SET sql_code = 0;
+      SET err_msg = 'Deposit successful';
+    END IF;
+END@
+
+CREATE PROCEDURE P2.ACCT_WTH
+(IN p_number INTEGER, IN p_amt INTEGER, OUT sql_code INTEGER, OUT err_msg CHAR(100))
+LANGUAGE SQL
+  BEGIN
+    IF p_number < 1000 THEN
+      SET sql_code = -100;
+      SET err_msg = 'Invalid account number';
+    ELSEIF p_amt < 0 THEN
+      SET sql_code = -100;
+      SET err_msg = 'Invalid amount';
+    ELSE
+      UPDATE p2.account SET Balance = Balance - p_amt WHERE Number = p_number;
+      SET sql_code = 0;
+      SET err_msg = 'Withdrawal successful';
+    END IF;
+END@
+
+-- FOR P2.ACCT_TRX, Use Stored procedures P2.ACCT_WTH then P2.ACCT_DEP to transfer balance.
+CREATE PROCEDURE P2.ACCT_TRX
+(IN p_src_acct INTEGER, IN p_dest_acct INTEGER, IN p_amt INTEGER, OUT sql_code INTEGER, OUT err_msg CHAR(100))
+LANGUAGE SQL
+  BEGIN
+    IF p_src_acct < 1000 THEN
+      SET sql_code = -100;
+      SET err_msg = 'Invalid source account number';
+    ELSEIF p_dest_acct < 1000 THEN
+      SET sql_code = -100;
+      SET err_msg = 'Invalid destination account number';
+    ELSEIF p_src_acct = p_dest_acct THEN
+      SET sql_code = -100;
+      SET err_msg = 'Source and destination accounts cannot be the same';
+    ELSEIF p_amt < 0 THEN
+      SET sql_code = -100;
+      SET err_msg = 'Invalid amount';
+    ELSE
+      SELECT Balance INTO p_src_bal FROM p2.account WHERE Number = p_src_acct;
+      SELECT Balance INTO p_dest_bal FROM p2.account WHERE Number = p_dest_acct;
+      IF p_src_bal < p_amt THEN
+        SET sql_code = -100;
+        SET err_msg = 'Insufficient funds';
+      ELSE
+        UPDATE p2.account SET Balance = Balance - p_amt WHERE Number = p_src_acct;
+        UPDATE p2.account SET Balance = Balance + p_amt WHERE Number = p_dest_acct;
+        SET sql_code = 0;
+        SET err_msg = 'Transfer successful';
+      END IF;
     END IF;
 END@
 
