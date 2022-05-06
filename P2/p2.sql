@@ -51,6 +51,44 @@ LANGUAGE SQL
       SET err_msg = valid;
     END IF;
 END@
+
+--
+--
+
+--Section B:  User Defined Functions – Two UDFs are created in create.clp for you.
+-- P2.encrypt (pin integer): Must be used in the CUST_CRT (…) as we only store encrypted PW.
+-- P2.decrypt (pin integer): Must be used in CUST_LOGIN (…) to decrypt/verify the encrypted PW.
+
+-- Section C:  SQL/PL Stored Procedures:
+
+-- 1.  CUST_CRT (Name, Gender, Age, Pin, ID, sqlcode, err_msg)
+-- 2.  CUST_LOGIN (ID, Pin, Valid, sqlcode, err_msg)  (Valid = 1 if match, 0 for failure)
+-- 3.  ACCT_OPN (ID, Balance, Type, Number, sqlcode, err_msg)
+-- 4.  ACCT_CLS (Number, sqlcode, err_msg)
+-- 5.  ACCT_DEP (Number, Amt, sqlcode, err_msg)
+-- 6.  ACCT_WTH (Number, Amt, sqlcode, err_msg)
+-- 7.  ACCT_TRX (Src_Acct, Dest_Acct, Amt, sqlcode, err_msg)
+-- 8.  ADD_INTEREST (Savings_Rate, Checking_Rate, sqlcode, err_msg)
+
+CREATE PROCEDURE P2.ACCT_OPN
+(IN p_id INTEGER, IN p_balance INTEGER, IN p_type CHAR(1), OUT p_number INTEGER, OUT sql_code INTEGER, OUT err_msg CHAR(100))
+LANGUAGE SQL
+  BEGIN
+    IF p_id < 0 THEN
+      SET sql_code = -100;
+      SET err_msg = 'Invalid id';
+    ELSEIF p_balance < 0 THEN
+      SET sql_code = -100;
+      SET err_msg = 'Invalid balance';
+    ELSEIF p_type != 'S' AND p_type != 'C' THEN
+      SET sql_code = -100;
+      SET err_msg = 'Invalid type';
+    ELSE
+      INSERT INTO p2.account (Id, Balance, Type) VALUES (p_id, p_balance, p_type);
+      SET p_number = SELECT Number FROM P2.account WHERE ID = p_id AND Type = p_type;
+      SET sql_code = 0;
+      SET err_msg = p_number;
+    END IF;
+END@
+
 TERMINATE@
---
---
