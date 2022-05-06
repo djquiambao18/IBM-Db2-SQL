@@ -183,4 +183,14 @@ LANGUAGE SQL
     END IF;
 END@
 
+CREATE PROCEDURE P2.ADD_INTEREST
+(IN p_savings_rate FLOAT, IN p_checking_rate FLOAT, OUT sql_code INTEGER, OUT err_msg CHAR(100))
+LANGUAGE SQL
+  BEGIN
+    UPDATE p2.account SET Balance = Balance + (Balance * p_savings_rate) WHERE Type = 'S' AND Status = 'A';
+    UPDATE p2.account SET Balance = Balance + (Balance * p_checking_rate) WHERE Type = 'C' AND Status = 'A';
+    SET sql_code = 0;
+    SET err_msg = 'Interest added';
+END@
+
 TERMINATE@
