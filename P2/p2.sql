@@ -163,8 +163,20 @@ LANGUAGE SQL
         SET sql_code = -100;
         SET err_msg = 'Insufficient funds';
       ELSE
-        UPDATE p2.account SET Balance = Balance - p_amt WHERE Number = p_src_acct;
-        UPDATE p2.account SET Balance = Balance + p_amt WHERE Number = p_dest_acct;
+        CALL P2.ACCT_WTH(p_src_acct, p_amt, sql_code, err_msg);
+        IF sql_code <> 0 THEN
+          SET sql_code = -100;
+          SET err_msg = 'Withdrawal failed';
+        ELSE
+          CALL P2.ACCT_DEP(p_dest_acct, p_amt, sql_code, err_msg);
+          IF sql_code <> 0 THEN
+            SET sql_code = -100;
+            SET err_msg = 'Deposit failed';
+          ELSE
+            SET sql_code = 0;
+            SET err_msg = 'Transfer successful';
+          END IF;
+        END IF;
         SET sql_code = 0;
         SET err_msg = 'Transfer successful';
       END IF;
