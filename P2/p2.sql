@@ -80,6 +80,7 @@ CREATE PROCEDURE P2.ACCT_OPN
 (IN p_id INTEGER, IN p_balance INTEGER, IN p_type CHAR(1), OUT p_number INTEGER, OUT sql_code INTEGER, OUT err_msg CHAR(100))
 LANGUAGE SQL
   BEGIN
+    DECLARE cust_id INTEGER;
     IF p_id < 0 THEN
       SET sql_code = -100;
       SET err_msg = 'Invalid id';
@@ -90,11 +91,17 @@ LANGUAGE SQL
       SET sql_code = -100;
       SET err_msg = 'Invalid type';
     ELSE
-      INSERT INTO p2.account (Id, Balance, Type, Status) VALUES (p_id, p_balance, p_type, 'A');
+      SELECT ID INTO cust_id FROM p2.customer WHERE Id = p_id;
+      IF cust_id IS NULL THEN
+        SET sql_code = -100;
+        SET err_msg = 'Invalid id';
+      ELSE
+        INSERT INTO p2.account (p2.account.Cust_Id, p2.account.Balance, p2.account.Type, p2.account.Status) VALUES (cust_id, p_balance, p_type, 'A');
       -- SET p_number = 
-      SELECT Number INTO p_number FROM P2.account WHERE ID = p_id AND Type = p_type;
-      SET sql_code = 0;
-      SET err_msg = p_number;
+        SELECT Number INTO p_number FROM P2.account WHERE ID = p_id AND Type = p_type;
+        SET sql_code = 0;
+        SET err_msg = p_number;
+      END IF;
     END IF;
 END@
 
@@ -106,9 +113,15 @@ LANGUAGE SQL
       SET sql_code = -100;
       SET err_msg = 'Invalid account number';
     ELSE
-      UPDATE p2.account SET Status = 'I', Balance = 0 WHERE Number = p_number;
-      SET sql_code = 0;
-      SET err_msg = 'Account closed';
+      SELECT p_number FROM p2.account WHERE Number = p_number AND Status = 'A';
+      IF p_number IS NULL THEN
+        SET sql_code = -100;
+        SET err_msg = 'Invalid account number';
+      ELSE
+        UPDATE p2.account SET Status = 'I', Balance = 0 WHERE Number = p_number;
+        SET sql_code = 0;
+        SET err_msg = 'Account closed';
+      END IF;
     END IF;
 END@
 
@@ -123,9 +136,15 @@ LANGUAGE SQL
       SET sql_code = -100;
       SET err_msg = 'Invalid amount';
     ELSE
-      UPDATE p2.account SET Balance = Balance + p_amt WHERE Number = p_number;
-      SET sql_code = 0;
-      SET err_msg = 'Deposit successful';
+      SELECT p_number FROM p2.account WHERE Number = p_number AND Status = 'A';
+      IF p_number IS NULL THEN
+        SET sql_code = -100;
+        SET err_msg = 'Invalid account number';
+      ELSE
+        UPDATE p2.account SET Balance = Balance + p_amt WHERE Number = p_number;
+        SET sql_code = 0;
+        SET err_msg = 'Deposit successful';
+      END IF;
     END IF;
 END@
 
@@ -133,6 +152,7 @@ CREATE PROCEDURE P2.ACCT_WTH
 (IN p_number INTEGER, IN p_amt INTEGER, OUT sql_code INTEGER, OUT err_msg CHAR(100))
 LANGUAGE SQL
   BEGIN
+    DECLARE temp_amt INTEGER;
     IF p_number < 1000 THEN
       SET sql_code = -100;
       SET err_msg = 'Invalid account number';
@@ -140,9 +160,15 @@ LANGUAGE SQL
       SET sql_code = -100;
       SET err_msg = 'Invalid amount';
     ELSE
-      UPDATE p2.account SET Balance = Balance - p_amt WHERE Number = p_number;
-      SET sql_code = 0;
-      SET err_msg = 'Withdrawal successful';
+      SELECT Balance INTO temp_amt FROM p2.account WHERE Number = p_number;
+      IF temp_amt < p_amt THEN
+        SET sql_code = -100;
+        SET err_msg = 'Insufficient funds';
+      ELSE
+        UPDATE p2.account SET Balance = Balance - p_amt WHERE Number = p_number;
+        SET sql_code = 0;
+        SET err_msg = 'Withdrawal successful';
+      END IF;
     END IF;
 END@
 
@@ -151,6 +177,10 @@ CREATE PROCEDURE P2.ACCT_TRX
 (IN p_src_acct INTEGER, IN p_dest_acct INTEGER, IN p_amt INTEGER, OUT sql_code INTEGER, OUT err_msg CHAR(100))
 LANGUAGE SQL
   BEGIN
+    DECLARE acct_src INTEGER;
+    DECLARE acct_dest INTEGER;
+    DECLARE p_src_bal INTEGER;
+    DECLARE p_dest_bal INTEGER;
     IF p_src_acct < 1000 THEN
       SET sql_code = -100;
       SET err_msg = 'Invalid source account number';
@@ -164,7 +194,17 @@ LANGUAGE SQL
       SET sql_code = -100;
       SET err_msg = 'Invalid amount';
     ELSE
-      SELECT Balance INTO p_src_bal FROM p2.account WHERE Number = p_src_acct;
+      SELECT Number INTO acct_src FROM p2.account WHERE Number = p_src_acct AND Status = 'A';
+      IF acct_src IS NULL THEN
+        SET sql_code = -100;
+        SET err_msg = 'Invalid source account number';
+      ELSE
+        SELECT Balance INTO p_src_bal FROM p2.account WHERE Number = p_src_acct;
+        IF p_src_bal < p_amt THEN
+          SET sql_code = -100;
+          SET err_msg = 'Insufficient funds';
+        ELSE
+          SELECT p_
       SELECT Balance INTO p_dest_bal FROM p2.account WHERE Number = p_dest_acct;
       IF p_src_bal < p_amt THEN
         SET sql_code = -100;
