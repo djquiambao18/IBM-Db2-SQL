@@ -31,7 +31,7 @@ LANGUAGE SQL
       INSERT INTO p2.customer (p2.customer.Name, p2.customer.Gender, p2.customer.Age, p2.customer.Pin) VALUES (p_name, p_gender, p_age, p2.encrypt(p_pin));
       -- DECLARE id_cust INTEGER;
       -- DECLARE c1 cursor for
-      SELECT ID into err_msg FROM P2.CUSTOMER WHERE p2.customer.Name = p_name AND p2.decrypt(p2.customer.Pin) = p_pin;
+      SELECT ID into id FROM P2.CUSTOMER WHERE p2.customer.Name = p_name AND p2.decrypt(p2.customer.Pin) = p_pin;
       -- OPEN c1;
       -- FETCH c1 into err_msg;
       -- CLOSE c1;
@@ -42,9 +42,10 @@ END@
 --
 
 CREATE PROCEDURE P2.CUST_LOGIN
-(IN p_pin INTEGER, IN p_id INTEGER, OUT valid BINARY, OUT sql_code INTEGER, OUT err_msg CHAR(100))
+(IN p_pin INTEGER, IN p_id INTEGER, OUT valid INTEGER, OUT sql_code INTEGER, OUT err_msg CHAR(100))
 LANGUAGE SQL
   BEGIN
+    DECLARE count_cust INTEGER;
     IF p_pin < 0 THEN
       SET sql_code = -100;
       SET err_msg = 'Invalid pin';
@@ -52,9 +53,15 @@ LANGUAGE SQL
       SET sql_code = -100;
       SET err_msg = 'Invalid id';
     ELSE
-      SELECT COUNT(*) INTO valid FROM p2.customer WHERE p2.decrypt(Pin) = p_pin AND Id = p_id;
-      SET sql_code = 0;
-      SET err_msg = valid;
+      SELECT COUNT(*) into count_cust FROM p2.customer WHERE p2.decrypt(Pin) = p_pin AND p2.customer.ID = p_id;
+      IF count_cust = 0 THEN
+        SET sql_code = -100;
+        SET valid = 0;
+        SET err_msg = 'Incorrect id or pin';
+      ELSE
+        SET valid = 1;
+        SET sql_code = 0;
+      END IF;
     END IF;
 END@
 
@@ -96,11 +103,9 @@ LANGUAGE SQL
         SET sql_code = -100;
         SET err_msg = 'Invalid id';
       ELSE
-        INSERT INTO p2.account (p2.account.Cust_Id, p2.account.Balance, p2.account.Type, p2.account.Status) VALUES (cust_id, p_balance, p_type, 'A');
-      -- SET p_number = 
-        SELECT Number INTO p_number FROM P2.account WHERE ID = p_id AND Type = p_type;
+        INSERT INTO p2.account (p2.account.ID, p2.account.Balance, p2.account.Type, p2.account.Status) VALUES (cust_id, p_balance, p_type, 'A');
+        SELECT Number INTO p_number FROM p2.ACCOUNT WHERE ID = p_id AND Type = p_type;
         SET sql_code = 0;
-        SET err_msg = p_number;
       END IF;
     END IF;
 END@
@@ -109,16 +114,17 @@ CREATE PROCEDURE P2.ACCT_CLS
 (IN p_number INTEGER, OUT sql_code INTEGER, OUT err_msg CHAR(100))
 LANGUAGE SQL
   BEGIN
+    DECLARE temp_num INTEGER;
     IF p_number < 1000 THEN
       SET sql_code = -100;
       SET err_msg = 'Invalid account number';
     ELSE
-      SELECT p_number FROM p2.account WHERE Number = p_number AND Status = 'A';
-      IF p_number IS NULL THEN
+      SELECT Number INTO temp_num FROM p2.ACCOUNT WHERE Number = p_number AND Status = 'A';
+      IF temp_num IS NULL THEN
         SET sql_code = -100;
         SET err_msg = 'Invalid account number';
       ELSE
-        UPDATE p2.account SET Status = 'I', Balance = 0 WHERE Number = p_number;
+        UPDATE p2.account SET Status = 'I', Balance = 0 WHERE Number = p_number AND Status = 'A';
         SET sql_code = 0;
         SET err_msg = 'Account closed';
       END IF;
@@ -129,6 +135,7 @@ CREATE PROCEDURE P2.ACCT_DEP
 (IN p_number INTEGER, IN p_amt INTEGER, OUT sql_code INTEGER, OUT err_msg CHAR(100))
 LANGUAGE SQL
   BEGIN
+    DECLARE temp_num INTEGER;
     IF p_number < 1000 THEN
       SET sql_code = -100;
       SET err_msg = 'Invalid account number';
@@ -136,12 +143,12 @@ LANGUAGE SQL
       SET sql_code = -100;
       SET err_msg = 'Invalid amount';
     ELSE
-      SELECT p_number FROM p2.account WHERE Number = p_number AND Status = 'A';
-      IF p_number IS NULL THEN
+      SELECT Number INTO temp_num FROM p2.account WHERE Number = p_number AND Status = 'A';
+      IF temp_num IS NULL THEN
         SET sql_code = -100;
         SET err_msg = 'Invalid account number';
       ELSE
-        UPDATE p2.account SET Balance = Balance + p_amt WHERE Number = p_number;
+        UPDATE p2.account SET Balance = Balance + p_amt WHERE Number = p_number AND Status = 'A';
         SET sql_code = 0;
         SET err_msg = 'Deposit successful';
       END IF;
@@ -152,6 +159,7 @@ CREATE PROCEDURE P2.ACCT_WTH
 (IN p_number INTEGER, IN p_amt INTEGER, OUT sql_code INTEGER, OUT err_msg CHAR(100))
 LANGUAGE SQL
   BEGIN
+    DECLARE temp_num INTEGER;
     DECLARE temp_amt INTEGER;
     IF p_number < 1000 THEN
       SET sql_code = -100;
@@ -160,14 +168,20 @@ LANGUAGE SQL
       SET sql_code = -100;
       SET err_msg = 'Invalid amount';
     ELSE
-      SELECT Balance INTO temp_amt FROM p2.account WHERE Number = p_number;
-      IF temp_amt < p_amt THEN
+      SELECT Number INTO temp_num FROM P2.ACCOUNT Where Number = p_number AND Status = 'A';
+      IF temp_num IS NULL THEN
         SET sql_code = -100;
-        SET err_msg = 'Insufficient funds';
+        SET err_msg = 'Invalid account number';
       ELSE
-        UPDATE p2.account SET Balance = Balance - p_amt WHERE Number = p_number;
-        SET sql_code = 0;
-        SET err_msg = 'Withdrawal successful';
+        SELECT Balance INTO temp_amt FROM p2.account WHERE Number = p_number AND Status = 'A';
+        IF temp_amt < p_amt THEN
+          SET sql_code = -100;
+          SET err_msg = 'Insufficient funds';
+        ELSE
+          UPDATE p2.account SET Balance = Balance - p_amt WHERE Number = p_number AND Status = 'A';
+          SET sql_code = 0;
+          SET err_msg = 'Withdrawal successful';
+        END IF;
       END IF;
     END IF;
 END@
@@ -177,6 +191,8 @@ CREATE PROCEDURE P2.ACCT_TRX
 (IN p_src_acct INTEGER, IN p_dest_acct INTEGER, IN p_amt INTEGER, OUT sql_code INTEGER, OUT err_msg CHAR(100))
 LANGUAGE SQL
   BEGIN
+    DECLARE s_code INTEGER;
+    DECLARE e_msg CHAR(100);
     DECLARE acct_src INTEGER;
     DECLARE acct_dest INTEGER;
     DECLARE p_src_bal INTEGER;
@@ -194,34 +210,38 @@ LANGUAGE SQL
       SET sql_code = -100;
       SET err_msg = 'Invalid amount';
     ELSE
-      SELECT Number INTO acct_src FROM p2.account WHERE Number = p_src_acct AND Status = 'A';
+      SELECT Number INTO acct_src FROM p2.account WHERE Number = p_src_acct AND Status = 'A' AND p_src_acct <> p_dest_acct;
       IF acct_src IS NULL THEN
         SET sql_code = -100;
         SET err_msg = 'Invalid source account number';
       ELSE
-        SELECT Balance INTO p_src_bal FROM p2.account WHERE Number = p_src_acct;
+        SELECT Balance INTO p_src_bal FROM p2.account WHERE Number = p_src_acct AND Status = 'A' AND p_src_acct <> p_dest_acct;
         IF p_src_bal < p_amt THEN
           SET sql_code = -100;
           SET err_msg = 'Insufficient funds';
         ELSE
-          SELECT p_
-      SELECT Balance INTO p_dest_bal FROM p2.account WHERE Number = p_dest_acct;
-      IF p_src_bal < p_amt THEN
-        SET sql_code = -100;
-        SET err_msg = 'Insufficient funds';
-      ELSE
-        CALL P2.ACCT_WTH(p_src_acct, p_amt, sql_code, err_msg);
-        IF sql_code <> 0 THEN
-          SET sql_code = -100;
-          SET err_msg = 'Withdrawal failed';
-        ELSE
-          CALL P2.ACCT_DEP(p_dest_acct, p_amt, sql_code, err_msg);
-          IF sql_code <> 0 THEN
+          SELECT Number INTO acct_dest FROM p2.account WHERE Number = p_dest_acct AND Status = 'A' AND p_src_acct <> p_dest_acct;
+          IF acct_dest IS NULL THEN
             SET sql_code = -100;
-            SET err_msg = 'Deposit failed';
+            SET err_msg = 'Invalid destination account number';
           ELSE
-            SET sql_code = 0;
-            SET err_msg = 'Transfer successful';
+            SELECT Balance INTO p_dest_bal FROM p2.account WHERE Number = p_dest_acct AND Status = 'A' AND p_src_acct <> p_dest_acct;   
+            IF p_src_bal < p_amt THEN
+              SET sql_code = -100;
+              SET err_msg = 'Insufficient funds';
+            ELSE
+              CALL P2.ACCT_WTH(p_src_acct, p_amt, s_code, e_msg);
+              IF s_code <> 0 THEN
+                SET sql_code = s_code;
+                SET err_msg = e_msg;
+              ELSE
+                CALL P2.ACCT_DEP(p_dest_acct, p_amt, s_code, e_msg);
+                IF s_code <> 0 THEN
+                  SET sql_code = s_code;
+                  SET err_msg = e_msg;
+                END IF;
+              END IF;
+            END IF;
           END IF;
         END IF;
         SET sql_code = 0;
