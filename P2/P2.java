@@ -178,13 +178,12 @@ public class P2 {
           cstmt.registerOutParameter(6, java.sql.Types.INTEGER);
           cstmt.registerOutParameter(7, java.sql.Types.VARCHAR);
           cstmt.execute();
-          rs = cstmt.getResultSet();
-          if(rs.next() && rs.getInt(6) == 0){
+          if(cstmt.getInt(6) == 0){
             System.out.println("Customer " + name + " created.");
-            System.out.println("Customer ID: " + rs.getInt(5));
+            System.out.println("Customer ID: " + cstmt.getInt(5));
           }
           else{
-            System.out.println("Error: " + rs.getString(7));
+            System.out.println("Error: " + cstmt.getString(7));
           }
         }
         catch(SQLException sqlException){
@@ -222,7 +221,7 @@ public class P2 {
       else{
         try{
           stmt = conn.createStatement();
-          String query = "SELECT * FROM P2.customer WHERE id = " + customerID + " AND pin = " + pin;
+          String query = "SELECT * FROM P2.customer WHERE id = " + customerID + " AND P2.decrypt(pin) = " + pin;
           rs = stmt.executeQuery(query);
           if(rs.next()){
             System.out.println("Welcome " + rs.getString("name") + "!");
@@ -256,10 +255,9 @@ public class P2 {
                         cstmt.registerOutParameter(5, java.sql.Types.INTEGER);
                         cstmt.registerOutParameter(6, java.sql.Types.VARCHAR);
                         cstmt.execute();
-                        rs = cstmt.getResultSet();
-                        if(rs.next() && rs.getInt(4) == 0){
+                        if(cstmt.getInt(5) == 0){
                           System.out.println("Account opened.");
-                          System.out.println("Account #: " + rs.getInt(4));
+                          System.out.println("Account #: " + cstmt.getInt(4));
                         }
                         else{
                           System.out.println("Error: " + cstmt.getString(6));
@@ -296,8 +294,7 @@ public class P2 {
                           cstmt.registerOutParameter(2, java.sql.Types.INTEGER);
                           cstmt.registerOutParameter(3, java.sql.Types.VARCHAR);
                           cstmt.execute();
-                          rs = cstmt.getResultSet();
-                          if(rs.next() && cstmt.getInt(2) == 0){
+                          if(cstmt.getInt(2) == 0){
                             System.out.println("Account closed.");
                           }
                           else{
@@ -344,8 +341,7 @@ public class P2 {
                           cstmt.registerOutParameter(3, java.sql.Types.INTEGER);
                           cstmt.registerOutParameter(4, java.sql.Types.VARCHAR);
                           cstmt.execute();
-                          rs = cstmt.getResultSet();
-                          if(rs.next() && cstmt.getInt(3) == 0){
+                          if(cstmt.getInt(3) == 0){
                             System.out.println("Deposit successful.");
                           }
                           else{
@@ -390,8 +386,7 @@ public class P2 {
                           cstmt.registerOutParameter(3, java.sql.Types.INTEGER);
                           cstmt.registerOutParameter(4, java.sql.Types.VARCHAR);
                           cstmt.execute();
-                          rs = cstmt.getResultSet();
-                          if(rs.next() && cstmt.getInt(3) == 0){
+                          if(cstmt.getInt(3) == 0){
                             System.out.println("Withdraw successful.");
                           }
                           else{
@@ -447,8 +442,7 @@ public class P2 {
                             cstmt.registerOutParameter(4, java.sql.Types.INTEGER);
                             cstmt.registerOutParameter(5, java.sql.Types.VARCHAR);
                             cstmt.execute();
-                            rs = cstmt.getResultSet();
-                            if(rs.next() && rs.getInt(4) == 0){
+                            if(cstmt.getInt(4) == 0){
                               System.out.println("Transfer successful.");
                             }
                             else{
@@ -469,7 +463,6 @@ public class P2 {
                       }
                     }catch(Exception e){
                       System.out.println("EXCEPTION CAUGHT - Invalid input. Returning to main menu...");
-                      
                       return;
                     }
                   }
@@ -530,8 +523,7 @@ public class P2 {
                 cstmt.registerOutParameter(3, java.sql.Types.INTEGER);
                 cstmt.registerOutParameter(4, java.sql.Types.VARCHAR);
                 cstmt.execute();
-                rs = cstmt.getResultSet();
-                if(rs.next() && cstmt.getInt(3) == 0){
+                if(cstmt.getInt(3) == 0){
                   System.out.println("Interest added successfully.");
                 }
                 else{
