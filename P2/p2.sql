@@ -15,7 +15,7 @@ DROP PROCEDURE P2.ADD_INTEREST@
 --
 --
 CREATE PROCEDURE P2.CUST_CRT
-(IN p_name CHAR(15), IN p_gender CHAR(1), IN p_age INTEGER, IN p_pin INTEGER, OUT id INTEGER, OUT sql_code INTEGER, OUT err_msg CHAR(100))
+(IN p_name CHAR(15), IN p_gender CHAR(1), IN p_age INTEGER, IN p_pin INTEGER, OUT id INTEGER, OUT sql_code INTEGER, OUT err_msg VARCHAR(100))
 LANGUAGE SQL
   BEGIN
     IF p_gender != 'M' AND p_gender != 'F' THEN

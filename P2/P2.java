@@ -69,7 +69,33 @@ public class P2 {
                 customerID = Integer.parseInt(sc.nextLine());
                 System.out.println("Enter your pin: ");
                 pin = Integer.parseInt(sc.nextLine());
-                screenThree(customerID, pin);
+                int valid = -1, sql_code = -1;
+                String err_msg = "";
+                try{
+                  CallableStatement cstmt = conn.prepareCall("{call P2.CUST_LOGIN(?,?,?,?,?)}");
+                  cstmt.setInt(1, customerID);
+                  cstmt.setInt(2, pin);
+                  cstmt.registerOutParameter(3, java.sql.Types.INTEGER);
+                  cstmt.registerOutParameter(4, java.sql.Types.INTEGER);
+                  cstmt.registerOutParameter(5, java.sql.Types.VARCHAR);
+                  cstmt.execute();
+                  valid = cstmt.getInt(3);
+                  sql_code = cstmt.getInt(4);
+                  err_msg = cstmt.getString(5);
+                }
+                catch(SQLException e){
+                  System.out.println("SQL Error: " + e.getMessage());
+                  return;
+                }
+                catch(Exception e){
+                  System.out.println("Error: " + e.getMessage());
+                  return;
+                }
+                if(valid == 1 && sql_code == 0)
+                  screenThree(customerID, pin);
+                else{
+                  System.out.println("Error: " + err_msg);
+                }
               }
               case 3 -> {
                 System.out.println("Exiting program...");
@@ -96,6 +122,7 @@ public class P2 {
   static void screenTwo(){
     // Scsc = new Scanner(System.in);
       String gender = "", name = "", age = "", pin = "";
+      int n_age = 0, n_pin = 0;
       System.out.print("\nEnter Name (no longer than 15 characters): ");
         try{
           name = sc.nextLine();
@@ -125,6 +152,7 @@ public class P2 {
         System.out.print("\nEnter age: ");
         try{
           age = sc.nextLine();
+          n_age = Integer.parseInt(age);
         }catch(Exception e){
           System.out.println("EXCEPTION CAUGHT - Invalid age. Returning to main menu...");
           
@@ -133,16 +161,40 @@ public class P2 {
         System.out.print("\nEnter pin: ");
         try{
           pin = sc.nextLine();
+          n_pin = Integer.parseInt(pin);
         }
         catch(Exception e){
           System.out.println("EXCEPTION CAUGHT - Invalid pin. Returning to main menu...");
           return;
         }
-        CallableStatement cstmt = null;
+        
         try{
-          cstmt = conn.prepareCall("{call newCustomer(?,?,?,?)}");
+          CallableStatement cstmt = conn.prepareCall("{call P2.CUST_CRT(?,?,?,?,?,?,?)}");
           cstmt.setString(1, name);
-          cstmt.setString(2, 
+          cstmt.setString(2, gender);
+          cstmt.setInt(3, n_age);
+          cstmt.setInt(4, n_pin);
+          cstmt.registerOutParameter(5, java.sql.Types.INTEGER);
+          cstmt.registerOutParameter(6, java.sql.Types.INTEGER);
+          cstmt.registerOutParameter(7, java.sql.Types.VARCHAR);
+          cstmt.execute();
+          rs = cstmt.getResultSet();
+          if(rs.next() && rs.getInt(6) == 0){
+            System.out.println("Customer " + name + " created.");
+            System.out.println("Customer ID: " + rs.getInt(5));
+          }
+          else{
+            System.out.println("Error: " + rs.getString(7));
+          }
+        }
+        catch(SQLException sqlException){
+          System.out.println("SQL Exception Caught");
+          sqlException.printStackTrace();
+        }
+        catch(Exception e){
+          System.out.println("Exception Caught");
+          e.printStackTrace();
+        }
        
   }    
 
@@ -154,8 +206,7 @@ public class P2 {
         3.	Deposit
         4.	Withdraw
         5.	Transfer
-        6.	Account Summary
-        7.	Exit
+        6.	Exit
 
         For #1, prompt for customer ID, account type, and balance (Initial deposit).  System will return an account number if successful.
         For #2, prompt for account #, change the status attribute to 'I' and empty the balance for that account. 
@@ -171,7 +222,7 @@ public class P2 {
       else{
         try{
           stmt = conn.createStatement();
-          String query = "SELECT * FROM P1.customer WHERE id = " + customerID + " AND pin = " + pin;
+          String query = "SELECT * FROM P2.customer WHERE id = " + customerID + " AND pin = " + pin;
           rs = stmt.executeQuery(query);
           if(rs.next()){
             System.out.println("Welcome " + rs.getString("name") + "!");
@@ -180,11 +231,10 @@ public class P2 {
             System.out.println("3. Deposit");
             System.out.println("4. Withdraw");
             System.out.println("5. Transfer");
-            System.out.println("6. Account Summary");
-            System.out.println("7. Exit");  
+            System.out.println("6. Exit");
             System.out.print("Enter your choice: ");
             int choice = Integer.parseInt(sc.nextLine());
-              while(choice != 7){
+              while(choice != 6){
                 switch(choice){
                   case 1 -> {
                     System.out.println("Open Account");
@@ -195,10 +245,33 @@ public class P2 {
                       String type = sc.nextLine();
                       System.out.print("\nEnter balance (initial deposit): ");
                       String balance = sc.nextLine();
-                      BankingSystem.openAccount(cid, type, balance);
-                    }catch(Exception e){
+                      int n_balance = Integer.parseInt(balance);
+                      int n_id = Integer.parseInt(cid);
+                      try{
+                        CallableStatement cstmt = conn.prepareCall("{call P2.ACCT_OPN(?,?,?,?,?,?)}");
+                        cstmt.setInt(1, n_id);
+                        cstmt.setInt(2, n_balance);
+                        cstmt.setString(3, type);
+                        cstmt.registerOutParameter(4, java.sql.Types.INTEGER);
+                        cstmt.registerOutParameter(5, java.sql.Types.INTEGER);
+                        cstmt.registerOutParameter(6, java.sql.Types.VARCHAR);
+                        cstmt.execute();
+                        rs = cstmt.getResultSet();
+                        if(rs.next() && rs.getInt(4) == 0){
+                          System.out.println("Account opened.");
+                          System.out.println("Account #: " + rs.getInt(4));
+                        }
+                        else{
+                          System.out.println("Error: " + cstmt.getString(6));
+                        }
+                      }
+                      catch(SQLException sqlException){
+                        System.out.println("SQL Exception Caught");
+                        sqlException.printStackTrace();
+                      }     
+                    }
+                    catch(Exception e){
                       System.out.println("EXCEPTION CAUGHT - Invalid input. Returning to main menu...");
-                      
                       return;
                     }
                     
@@ -215,17 +288,34 @@ public class P2 {
                       }
                       System.out.print("\nEnter account number: ");
                       String account = sc.nextLine();
-                      
+                      int n_acct = Integer.parseInt(account);
                       if(accountNumbers.contains(account)){
-                        BankingSystem.closeAccount(account);
+                        try{
+                          CallableStatement cstmt = conn.prepareCall("{call P2.ACCT_CLS(?,?,?)}");
+                          cstmt.setInt(1, n_acct);
+                          cstmt.registerOutParameter(2, java.sql.Types.INTEGER);
+                          cstmt.registerOutParameter(3, java.sql.Types.VARCHAR);
+                          cstmt.execute();
+                          rs = cstmt.getResultSet();
+                          if(rs.next() && cstmt.getInt(2) == 0){
+                            System.out.println("Account closed.");
+                          }
+                          else{
+                            System.out.println("Error: " + cstmt.getString(3));
+                          }
+                          System.out.println("Account closed.");
+                        }catch(SQLException sqlException)
+                        {
+                          System.out.println("SQL Exception Caught");
+                          sqlException.printStackTrace();
+                        }
                       }
                       else{
                         System.out.println("Invalid account number.");
                       }
-                      
+                      accountNumbers.clear();
                     }catch(Exception e){
                       System.out.println("EXCEPTION CAUGHT - Invalid input. Returning to main menu...");
-                      
                       return;
                     }
                     
@@ -245,11 +335,32 @@ public class P2 {
                       if(accountNumbers.contains(account)){
                         System.out.print("\nEnter deposit amount: ");
                         String amount = sc.nextLine();
-                        BankingSystem.deposit(account, amount);
+                        int n_amount = Integer.parseInt(amount);
+                        int n_acct = Integer.parseInt(account);
+                        try{
+                          CallableStatement cstmt = conn.prepareCall("{call P2.ACCT_DEP(?,?,?,?)}");
+                          cstmt.setInt(1, n_acct);
+                          cstmt.setInt(2, n_amount);
+                          cstmt.registerOutParameter(3, java.sql.Types.INTEGER);
+                          cstmt.registerOutParameter(4, java.sql.Types.VARCHAR);
+                          cstmt.execute();
+                          rs = cstmt.getResultSet();
+                          if(rs.next() && cstmt.getInt(3) == 0){
+                            System.out.println("Deposit successful.");
+                          }
+                          else{
+                            System.out.println("Error: " + cstmt.getString(4));
+                          }
+                        }
+                        catch(SQLException sqlException){
+                          System.out.println("SQL Exception Caught");
+                          sqlException.printStackTrace();
+                        }
                       }
                       else{
                         System.out.println("Invalid account number.");
                       }
+                      accountNumbers.clear();
                     }catch(Exception e){
                       System.out.println("EXCEPTION CAUGHT - Invalid input. Returning to main menu...");
                       return;
@@ -270,7 +381,27 @@ public class P2 {
                       if(accountNumbers.contains(account)){
                         System.out.print("\nEnter withdraw amount: ");
                         String amount = sc.nextLine();
-                        BankingSystem.withdraw(account, amount);
+                        int n_amount = Integer.parseInt(amount);
+                        int n_acct = Integer.parseInt(account);
+                        try{
+                          CallableStatement cstmt = conn.prepareCall("{call P2.ACCT_WTH(?,?,?,?)}");
+                          cstmt.setInt(1, n_acct);
+                          cstmt.setInt(2, n_amount);
+                          cstmt.registerOutParameter(3, java.sql.Types.INTEGER);
+                          cstmt.registerOutParameter(4, java.sql.Types.VARCHAR);
+                          cstmt.execute();
+                          rs = cstmt.getResultSet();
+                          if(rs.next() && cstmt.getInt(3) == 0){
+                            System.out.println("Withdraw successful.");
+                          }
+                          else{
+                            System.out.println("Error: " + cstmt.getString(4));
+                          }
+                        }
+                        catch(SQLException sqlException){
+                          System.out.println("SQL Exception Caught");
+                          sqlException.printStackTrace();
+                        }
                       }
                       else{
                         System.out.println("Invalid account number.");
@@ -305,7 +436,29 @@ public class P2 {
                         if(accountNumbers.contains(destination)){
                           System.out.print("\nEnter transfer amount: ");
                           String amount = sc.nextLine();
-                          BankingSystem.transfer(source, destination, amount);
+                          int n_amount = Integer.parseInt(amount);
+                          int n_source = Integer.parseInt(source);
+                          int n_dest = Integer.parseInt(destination);
+                          try{
+                            CallableStatement cstmt = conn.prepareCall("{call P2.ACCT_TRX(?,?,?,?,?)}");
+                            cstmt.setInt(1, n_source);
+                            cstmt.setInt(2, n_dest);
+                            cstmt.setInt(3, n_amount);
+                            cstmt.registerOutParameter(4, java.sql.Types.INTEGER);
+                            cstmt.registerOutParameter(5, java.sql.Types.VARCHAR);
+                            cstmt.execute();
+                            rs = cstmt.getResultSet();
+                            if(rs.next() && rs.getInt(4) == 0){
+                              System.out.println("Transfer successful.");
+                            }
+                            else{
+                              System.out.println("Error: " + cstmt.getString(5));
+                            }
+                          }
+                          catch(SQLException sqlException){
+                            System.out.println("SQL Exception Caught");
+                            sqlException.printStackTrace();
+                          }
                         }
                         else{
                           System.out.println("Invalid destination account number.");
@@ -321,10 +474,6 @@ public class P2 {
                     }
                   }
                   case 6 -> {
-                    System.out.println("Account Summary");
-                    BankingSystem.accountSummary(Integer.toString(customerID));
-                  }
-                  case 7 -> {
                     System.out.println("Returning to main menu...");
                   }
                   default -> {
@@ -336,8 +485,7 @@ public class P2 {
                 System.out.println("3. Deposit");
                 System.out.println("4. Withdraw");
                 System.out.println("5. Transfer");
-                System.out.println("6. Account Summary");
-                System.out.println("7. Exit");  
+                System.out.println("6. Exit");
                 System.out.print("Enter your choice: ");
                 choice = Integer.parseInt(sc.nextLine());
               }
@@ -361,40 +509,50 @@ public class P2 {
   static void adminScreen(){
     System.out.println("Administrator Main Menu");
    
-    System.out.println("1. Account Summary for a Customer");
-    System.out.println("2. Report A :: Customer Information with Total Balance in Decreasing Order");
-    System.out.println("3. Report B :: Find the Average Total Balance Between Age Groups");
-    System.out.println("4. Exit");
+    System.out.println("1. Add Interest");
+    System.out.println("2. Exit");
     System.out.print("Enter your choice: ");
     int choice = Integer.parseInt(sc.nextLine());
-    while(choice != 4){
+    while(choice != 2){
       try{
         switch(choice){
           case 1 -> {
-            System.out.print("\nEnter customer ID: ");
-            String customerID = sc.nextLine();
-            BankingSystem.accountSummary(customerID);
-          }
-          case 2 -> {
-            BankingSystem.reportA();
-          }
-          case 3 -> {
-            // stmt = conn.createStatement();
-            // String query = "SELECT  FROM P1.customer";
-            System.out.print("\nEnter minimum age: ");
-            String minAge = sc.nextLine();
-            System.out.print("\nEnter maximum age: ");
-            String maxAge = sc.nextLine();
-            BankingSystem.reportB(minAge, maxAge);
+            try{
+              System.out.print("\nEnter Savings Rate: ");
+              String sv_rate = sc.nextLine();
+              float n_sv_rate = Float.parseFloat(sv_rate);
+              String chk_rate = sc.nextLine();
+              float n_chk_rate = Float.parseFloat(chk_rate);
+              try{
+                CallableStatement cstmt = conn.prepareCall("{call P2.ADD_INTEREST(?,?,?,?)}");
+                cstmt.setFloat(1, n_sv_rate);
+                cstmt.setFloat(2, n_chk_rate);
+                cstmt.registerOutParameter(3, java.sql.Types.INTEGER);
+                cstmt.registerOutParameter(4, java.sql.Types.VARCHAR);
+                cstmt.execute();
+                rs = cstmt.getResultSet();
+                if(rs.next() && cstmt.getInt(3) == 0){
+                  System.out.println("Interest added successfully.");
+                }
+                else{
+                  System.out.println("Error: " + cstmt.getString(4));
+                }
+              }
+              catch(SQLException sqlException){
+                System.out.println("SQL Exception Caught");
+                sqlException.printStackTrace();
+              }
+            }catch(Exception e){
+              System.out.println("EXCEPTION CAUGHT - Invalid input. Returning to main menu...");
+              return;
+            }
           }
           default -> {
             System.out.println("Invalid choice.");
           }
         }
         System.out.println("1. Account Summary for a Customer");
-        System.out.println("2. Report A :: Customer Information with Total Balance in Decreasing Order");
-        System.out.println("3. Report B :: Find the Average Total Balance Between Age Groups");
-        System.out.println("4. Exit");
+        System.out.println("2. Exit");
         System.out.print("Enter your choice: ");
         choice = Integer.parseInt(sc.nextLine());
       }catch(Exception e){
@@ -402,9 +560,7 @@ public class P2 {
         return;
       }
     }
-
   }
-
   static void init(String filename){
     try {
 			Properties props = new Properties();						// Create a new Properties object
