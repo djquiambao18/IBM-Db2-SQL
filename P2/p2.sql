@@ -42,10 +42,10 @@ END@
 --
 
 CREATE PROCEDURE P2.CUST_LOGIN
-(IN p_pin INTEGER, IN p_id INTEGER, OUT valid INTEGER, OUT sql_code INTEGER, OUT err_msg CHAR(100))
+(IN p_id INTEGER, IN p_pin INTEGER, OUT valid INTEGER, OUT sql_code INTEGER, OUT err_msg CHAR(100))
 LANGUAGE SQL
   BEGIN
-    DECLARE count_cust INTEGER;
+    DECLARE cust_count INTEGER;
     IF p_pin < 0 THEN
       SET sql_code = -100;
       SET err_msg = 'Invalid pin';
@@ -53,14 +53,14 @@ LANGUAGE SQL
       SET sql_code = -100;
       SET err_msg = 'Invalid id';
     ELSE
-      SELECT COUNT(*) into count_cust FROM p2.customer WHERE p2.decrypt(Pin) = p_pin AND p2.customer.ID = p_id;
-      IF count_cust = 0 THEN
+      SELECT COUNT(*) INTO cust_count FROM p2.customer WHERE p2.decrypt(p2.customer.Pin) = p_pin AND p2.customer.ID = p_id;
+      IF cust_count = 1 THEN
+        SET valid = 1;
+        SET sql_code = 0;
+      ELSE
         SET sql_code = -100;
         SET valid = 0;
         SET err_msg = 'Incorrect id or pin';
-      ELSE
-        SET valid = 1;
-        SET sql_code = 0;
       END IF;
     END IF;
 END@
@@ -126,7 +126,6 @@ LANGUAGE SQL
       ELSE
         UPDATE p2.account SET Status = 'I', Balance = 0 WHERE Number = p_number AND Status = 'A';
         SET sql_code = 0;
-        SET err_msg = 'Account closed';
       END IF;
     END IF;
 END@
@@ -150,7 +149,6 @@ LANGUAGE SQL
       ELSE
         UPDATE p2.account SET Balance = Balance + p_amt WHERE Number = p_number AND Status = 'A';
         SET sql_code = 0;
-        SET err_msg = 'Deposit successful';
       END IF;
     END IF;
 END@
@@ -180,7 +178,6 @@ LANGUAGE SQL
         ELSE
           UPDATE p2.account SET Balance = Balance - p_amt WHERE Number = p_number AND Status = 'A';
           SET sql_code = 0;
-          SET err_msg = 'Withdrawal successful';
         END IF;
       END IF;
     END IF;
@@ -245,7 +242,6 @@ LANGUAGE SQL
           END IF;
         END IF;
         SET sql_code = 0;
-        SET err_msg = 'Transfer successful';
       END IF;
     END IF;
 END@
@@ -257,7 +253,6 @@ LANGUAGE SQL
     UPDATE p2.account SET Balance = Balance + (Balance * p_savings_rate) WHERE Type = 'S' AND Status = 'A';
     UPDATE p2.account SET Balance = Balance + (Balance * p_checking_rate) WHERE Type = 'C' AND Status = 'A';
     SET sql_code = 0;
-    SET err_msg = 'Interest added';
 END@
 
 TERMINATE@

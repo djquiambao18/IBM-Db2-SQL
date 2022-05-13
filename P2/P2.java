@@ -2,6 +2,7 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Scanner;
 import java.io.FileInputStream;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -34,9 +35,6 @@ public class P2 {
       For #1, prompt for Name, Gender, Age, and Pin.  System will return a customer ID if successful.
       For #2, prompt for customer ID and pin to authenticate the customer.  If user enters 0 for both customer ID & pin, then you will go straight to Screen #4.
       */
-      
-      BankingSystem.init(args[0]);
-      BankingSystem.testConnection();
       try{
         init(args[0]);
         Class.forName(driver);
@@ -140,7 +138,11 @@ public class P2 {
           System.out.println("EXCEPTION CAUGHT - Invalid pin. Returning to main menu...");
           return;
         }
-        BankingSystem.newCustomer(name, gender, age, pin);
+        CallableStatement cstmt = null;
+        try{
+          cstmt = conn.prepareCall("{call newCustomer(?,?,?,?)}");
+          cstmt.setString(1, name);
+          cstmt.setString(2, 
        
   }    
 
