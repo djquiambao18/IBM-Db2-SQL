@@ -92,7 +92,7 @@ public class P2 {
                   return;
                 }
                 if(valid == 1 && sql_code == 0)
-                  screenThree(customerID, pin);
+                    screenThree(customerID, pin);
                 else{
                   System.out.println("Error: " + err_msg);
                 }
@@ -131,6 +131,7 @@ public class P2 {
             name = sc.nextLine();
           }
         }catch(Exception e){
+          e.printStackTrace();
           System.out.println("EXCEPTION CAUGHT - Invalid name input. Returning to main menu...");
           
         }
@@ -141,6 +142,7 @@ public class P2 {
             throw new NullPointerException();
           }
         }catch(Exception e){
+          e.printStackTrace();
           System.out.println("EXCEPTION CAUGHT - invalid gender input. Returning to main menu...");
           return;
         }
@@ -154,8 +156,8 @@ public class P2 {
           age = sc.nextLine();
           n_age = Integer.parseInt(age);
         }catch(Exception e){
+
           System.out.println("EXCEPTION CAUGHT - Invalid age. Returning to main menu...");
-          
           return;
         }
         System.out.print("\nEnter pin: ");
@@ -164,6 +166,7 @@ public class P2 {
           n_pin = Integer.parseInt(pin);
         }
         catch(Exception e){
+          e.printStackTrace();
           System.out.println("EXCEPTION CAUGHT - Invalid pin. Returning to main menu...");
           return;
         }
@@ -242,18 +245,29 @@ public class P2 {
                       String cid = sc.nextLine();
                       System.out.print("\nEnter account type ('C' for Checking or 'S' for Savings): ");
                       String type = sc.nextLine();
+                      
+                      if(!type.equalsIgnoreCase("C") && !type.equalsIgnoreCase("S")){
+                        System.out.println("Invalid type: " + type + ". Please select either C or S");
+                        throw new Exception();
+                      }
+                      type.toUpperCase().trim();
                       System.out.print("\nEnter balance (initial deposit): ");
                       String balance = sc.nextLine();
                       int n_balance = Integer.parseInt(balance);
+                      if(n_balance < 0){
+                        System.out.println("Invalid balance: " + n_balance + ". Please enter a positive amount.");
+                        throw new Exception();
+                      }
                       int n_id = Integer.parseInt(cid);
                       try{
+                        
                         CallableStatement cstmt = conn.prepareCall("{call P2.ACCT_OPN(?,?,?,?,?,?)}");
                         cstmt.setInt(1, n_id);
                         cstmt.setInt(2, n_balance);
                         cstmt.setString(3, type);
                         cstmt.registerOutParameter(4, java.sql.Types.INTEGER);
                         cstmt.registerOutParameter(5, java.sql.Types.INTEGER);
-                        cstmt.registerOutParameter(6, java.sql.Types.VARCHAR);
+                        cstmt.registerOutParameter(6, java.sql.Types.CHAR);
                         cstmt.execute();
                         if(cstmt.getInt(5) == 0){
                           System.out.println("Account opened.");
@@ -278,7 +292,7 @@ public class P2 {
                     System.out.println("Close Account");
                     try{
                       stmt = conn.createStatement();
-                      query = "SELECT number FROM P1.account WHERE customer_id = " + customerID;
+                      query = "SELECT number FROM P2.account WHERE ID = " + customerID;
                       rs = stmt.executeQuery(query);
                       HashSet<String> accountNumbers = new HashSet<String>();
                       while(rs.next()){
@@ -292,7 +306,7 @@ public class P2 {
                           CallableStatement cstmt = conn.prepareCall("{call P2.ACCT_CLS(?,?,?)}");
                           cstmt.setInt(1, n_acct);
                           cstmt.registerOutParameter(2, java.sql.Types.INTEGER);
-                          cstmt.registerOutParameter(3, java.sql.Types.VARCHAR);
+                          cstmt.registerOutParameter(3, java.sql.Types.CHAR);
                           cstmt.execute();
                           if(cstmt.getInt(2) == 0){
                             System.out.println("Account closed.");
@@ -300,7 +314,6 @@ public class P2 {
                           else{
                             System.out.println("Error: " + cstmt.getString(3));
                           }
-                          System.out.println("Account closed.");
                         }catch(SQLException sqlException)
                         {
                           System.out.println("SQL Exception Caught");
@@ -311,7 +324,11 @@ public class P2 {
                         System.out.println("Invalid account number.");
                       }
                       accountNumbers.clear();
-                    }catch(Exception e){
+                    }catch(SQLException sqlException){
+                      System.out.println("SQL Exception Caught");
+                      sqlException.printStackTrace();
+                    }
+                    catch(Exception e){
                       System.out.println("EXCEPTION CAUGHT - Invalid input. Returning to main menu...");
                       return;
                     }
@@ -321,7 +338,7 @@ public class P2 {
                     System.out.println("Deposit");
                     try{
                       stmt = conn.createStatement();
-                      query = "SELECT number FROM P1.account";
+                      query = "SELECT number FROM P2.account";
                       rs = stmt.executeQuery(query);
                       HashSet<String> accountNumbers = new HashSet<String>();
                       while(rs.next()){
@@ -366,7 +383,7 @@ public class P2 {
                     System.out.println("Withdraw");
                     try{
                       stmt = conn.createStatement();
-                      query = "SELECT number FROM P1.account WHERE id = " + customerID;
+                      query = "SELECT number FROM P2.account WHERE id = " + customerID;
                       rs = stmt.executeQuery(query);
                       HashSet<String> accountNumbers = new HashSet<String>();
                       while(rs.next()){
@@ -402,6 +419,7 @@ public class P2 {
                         System.out.println("Invalid account number.");
                       }
                     }catch(Exception e){
+                      e.printStackTrace();
                       System.out.println("EXCEPTION CAUGHT - Invalid input. Returning to main menu...");
                       return;
                     }
@@ -410,14 +428,14 @@ public class P2 {
                     System.out.println("Transfer");
                     try{
                       stmt = conn.createStatement();
-                      query = "SELECT number FROM P1.account";
+                      query = "SELECT number FROM P2.account";
                       rs = stmt.executeQuery(query);
                       HashSet<String> accountNumbers = new HashSet<String>();
                       while(rs.next()){
                         accountNumbers.add(rs.getString(1));
                       }
                       stmt = conn.createStatement();
-                      query = "SELECT number FROM P1.account WHERE id = " + customerID;
+                      query = "SELECT number FROM P2.account WHERE id = " + customerID;
                       rs = stmt.executeQuery(query);
                       HashSet<String> customerAccountNumbers = new HashSet<String>();
                       while(rs.next()){
@@ -463,6 +481,7 @@ public class P2 {
                       }
                     }catch(Exception e){
                       System.out.println("EXCEPTION CAUGHT - Invalid input. Returning to main menu...");
+                      e.printStackTrace();
                       return;
                     }
                   }

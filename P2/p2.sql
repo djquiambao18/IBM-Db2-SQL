@@ -98,13 +98,13 @@ LANGUAGE SQL
       SET sql_code = -100;
       SET err_msg = 'Invalid type';
     ELSE
-      SELECT ID INTO cust_id FROM p2.customer WHERE Id = p_id;
+      SELECT ID INTO cust_id FROM p2.customer WHERE Id = p_id FETCH FIRST 1 ROWS ONLY;
       IF cust_id IS NULL THEN
         SET sql_code = -100;
         SET err_msg = 'Invalid id';
       ELSE
         INSERT INTO p2.account (p2.account.ID, p2.account.Balance, p2.account.Type, p2.account.Status) VALUES (cust_id, p_balance, p_type, 'A');
-        SELECT Number INTO p_number FROM p2.ACCOUNT WHERE ID = p_id AND Type = p_type;
+        SELECT Number INTO p_number FROM p2.ACCOUNT WHERE ID = p_id AND Type = p_type FETCH FIRST 1 ROWS ONLY;
         SET sql_code = 0;
       END IF;
     END IF;
